@@ -1,8 +1,15 @@
 Source Code for the Integrate and Fire Spiking Neural Network
 Available at https://github.com/lshupe/spikenet
 
-The source code for the IF neural network mode is written in Matlab and C for the 64-bit version running under Windows 10.  The C code is written as a Matlab mex function which has been precompiled for current (2017 to 2020) 64-bit versions of Matlab for PC.  This can be compiled with the mex command from within Matlab with the C compiler add-in.
-To install the source code, copy all files to a folder on the Matlab Path.  This is usually the Matlab folder within the user‚Äôs Documents folder.  For example C:/<user>/Documents/Matlab/ on a PC.
+The source code for the IF neural network mode is written in Matlab and C for the
+64-bit version running under Windows 10.  The C code is written as a Matlab mex 
+function which has been precompiled for current (2017 to 2020) 64-bit versions of 
+Matlab for PC.  This can be compiled with the mex command from within Matlab with 
+the C compiler add-in.
+
+To install the source code, copy all files to a folder on the Matlab Path.
+This is usually the Matlab folder within the userís Documents folder.  
+For example C:/<user>/Documents/Matlab/ on a PC.
 
 Contents:
 spikenet50.m  -- This is the base simulation file with conditioning turned off.
@@ -14,37 +21,60 @@ spikenet_emg_trig  -- Configured for EMG triggered conditioning
 spikenet_gamma_trig  -- Configured for gamma filtered LFP triggered conditioning
 spikenet50mex.c  -- The mex function that runs the network in blocks of 10 seconds
 spikenet50mex.mexw64  -- Precompiled Matlab mex function
-spikenet_wfig.m  -- Creates a weight figure from a simulation‚Äôs saved param.mat file.
+spikenet_wfig.m  -- Creates a weight figure from a simulationís saved param.mat file.
 spikenet_readme.txt  -- Information about running the network simulations.
 
 Running a simulation
-Once the simulation files have been installed, open Matlab and change the current directory to the folder containing these files.  Run the spikenet_no_cond.m script directly from the command line or open the script and run it from the editor tab run button.  This script will take up to an hour to run, but will update a graph for every 10 seconds of simulated time.  This graph is used to monitor the progress of the simulation.  It displays average activity of excitatory and output units for the 10 second time blocks for the current training period, averages of filtered local field potentials (LFP), and the current distribution of trainable connection strengths.   These averages reset at the beginning of each of the four training periods: No Conditioning, Preconditioning testing, Conditioning, and Post-Conditioning testing.  Connections between units are modified by the Spike-Timing Dependent Plasticity (STDP) rule during the Preconditioning and Conditioning periods, but connection strengths are held static during the testing periods to build histograms and make tests.  Simulation results are stored in a folder in the c:/data/ directory.  
-Files saved (<n> is the the simulation trial number for each 10 second block)
-averages_cond_<n>.fig ‚Äì The monitoring averages saved during the conditioning period
-averages_nocond_<n>.fig ‚Äì The monitoring averages saved during the no-conditioning period
-averages_pre_<n>.fig ‚Äì The monitoring averages saved during the pre-conditioning period
-averages_post_<n>.fig ‚Äì The monitoring averages saved during the post-conditioning period
-Cond_Trig_PSTH-<n>.fig ‚Äì Spike triggered averages and histograms aligned with conditioning triggers
-emg_spike_response.fig ‚Äì Stimulus triggered averages of the simulated EMG
-lfp_spike_response.fig ‚Äì Snit triggered LFP averages
-lfp_stim_response.fig ‚Äì Stimulus triggered LFP averages (used for A->B evoked potential changes)
-mean_Evoked_Potentials.fig ‚Äì Tracks MPI from the lfp_stim_response.fig when multiple repetitions through the training sequence are used (when p.ntrials_repeat > 1)
-output_spikes.mat ‚Äì Contains spike times (in 0.1 ms time steps) for unit firings during the simulation
-param.mat  ‚Äì Contains a copy of the simulations parameters and resulting connection strengths
-progress.txt ‚Äì A copy of the console output during the simulation.
-PSTH.fig ‚Äì Shows correlated activity between unit populations
+Once the simulation files have been installed, open Matlab and change the current 
+directory to the folder containing these files.  Run the spikenet_no_cond.m script 
+directly from the command line or open the script and run it from the editor tab 
+run button.  This script will take up to an hour to run, but will update a graph 
+for every 10 seconds of simulated time.  This graph is used to monitor the progress 
+of the simulation.  It displays average activity of excitatory and output units for 
+the 10 second time blocks for the current training period, averages of filtered 
+local field potentials (LFP), and the current distribution of trainable connection 
+strengths.   These averages reset at the beginning of each of the four training 
+periods: No Conditioning, Preconditioning testing, Conditioning, and Post-Conditioning
+testing.  Connections between units are modified by the Spike-Timing Dependent 
+Plasticity (STDP) rule during the Preconditioning and Conditioning periods, but 
+connection strengths are held static during the testing periods to build histograms 
+and make tests.  
+
+Simulation results are stored in a folder in the c:/data/ directory
+(<n> is the the simulation trial number for each 10 second block):
+averages_cond_<n>.fig ñ The monitoring averages saved during the conditioning period
+averages_nocond_<n>.fig ñ The monitoring averages saved during the no-conditioning period
+averages_pre_<n>.fig ñ The monitoring averages saved during the pre-conditioning period
+averages_post_<n>.fig ñ The monitoring averages saved during the post-conditioning period
+Cond_Trig_PSTH-<n>.fig ñ Spike triggered averages and histograms aligned with conditioning triggers
+emg_spike_response.fig ñ Stimulus triggered averages of the simulated EMG
+lfp_spike_response.fig ñ Snit triggered LFP averages
+lfp_stim_response.fig ñ Stimulus triggered LFP averages (used for A->B evoked potential changes)
+mean_Evoked_Potentials.fig ñ Tracks MPI from the lfp_stim_response.fig when multiple repetitions through the training sequence are used (when p.ntrials_repeat > 1)
+output_spikes.mat ñ Contains spike times (in 0.1 ms time steps) for unit firings during the simulation
+param.mat  ñ Contains a copy of the simulations parameters and resulting connection strengths
+progress.txt ñ A copy of the console output during the simulation.
+PSTH.fig ñ Shows correlated activity between unit populations
 Raster-<n> -- Contains a dot raster for 2 seconds of activity and power spectrums for LFP.
-spiknet.m ‚Äì Contains a copy of the script that runs this simulation
-spikenet50mex.c ‚Äì contains a copy of the mex function
-spikenet50mex.mexw64 ‚Äì Contains a copy of the compiled mex function
-weight_distribution.fig ‚Äì Distribution of weights between unit columns.  Used for checking efficacy of the conditioning method
-weight_matrix.fig ‚Äì Displays final connection strengths.  Use spikenet_wfig.m on the param.mat file to plot a formatted graph with labels.
+spiknet.m ñ Contains a copy of the script that runs this simulation
+spikenet50mex.c ñ contains a copy of the mex function
+spikenet50mex.mexw64 ñ Contains a copy of the compiled mex function
+weight_distribution.fig ñ Distribution of weights between unit columns.  Used for checking efficacy of the conditioning method
+weight_matrix.fig ñ Displays final connection strengths.  Use spikenet_wfig.m on the param.mat file to plot a formatted graph with labels.
 
 
 Conditioning Methods
-The base no-conditioning simulation provides information on network progression in absence of any conditioning stimulus intervention.  This can be used to see how much random variation there is by running the network for different periods of time or by using different initial conditions.  The base simulation file spikenet_no_cond.m contains a standard set of parameters that the other simulation files modify.
+The base no-conditioning simulation provides information on network progression 
+in absence of any conditioning stimulus intervention.  This can be used to see 
+how much random variation there is by running the network for different periods 
+of time or by using different initial conditions.  The base simulation file 
+spikenet_no_cond.m contains a standard set of parameters that the other simulation 
+files modify.
 
-Spike triggered stimulation:  This conditioning method delivers a stimulus to units in Column B when ever the first excitatory unit in Column A (Ae1) fires.  Since the timing of the stimuli depend on detected activity in the network, this is referred to as a ‚Äúclosed loop‚Äù stimulation method.
+Spike triggered stimulation:  This conditioning method delivers a stimulus to units 
+in Column B when ever the first excitatory unit in Column A (Ae1) fires.  Since the 
+timing of the stimuli depend on detected activity in the network, this is referred 
+to as a ìclosed loopî stimulation method.
 Notable parameters:
    p.conditioning_method = 1;  % Select spike triggered stimulation
    p.stim_delay_ms = 10;    % Millisecond delay between spike on Ae1 and stimulus on Column B.
@@ -53,7 +83,9 @@ Notable parameters:
    p.stim_refractory_ms = 10;  % Refractory period on delivered stimulation.
 
 
-Paired pulse stimulation:  This conditioning method delivers a stimulus to units in Column A followed by a delayed stimulus on Column B.  Since these stimuli are not relative to any activity in the network, this is called an ‚Äúopen loop‚Äù stimulation method.
+Paired pulse stimulation:  This conditioning method delivers a stimulus to units 
+in Column A followed by a delayed stimulus on Column B.  Since these stimuli are 
+not relative to any activity in the network, this is an ìopen loopî stimulation method.
 Notable parameters:
    p.conditioning_method = 2;  % Selects paired pulse stimulation
    p.conditioning_secs = 7; % 1..10 to change number of paired pulses in each 10 second time block.
@@ -63,7 +95,8 @@ Notable parameters:
    p.pair_uV = 2000;        % Size of the paired pulse simulation (the second pulse)
 
 
-Cycle triggered stimulation:  A closed loop conditioning method that detects oscillations imposed on Column B to trigger a stimulation on Column A.
+Cycle triggered stimulation:  A closed loop conditioning method that detects 
+oscillations imposed on Column B to trigger a stimulation on Column A.
 Notable parameters:
    p.conditioning_method = 3;  % Selects cycle triggered stimulation
    p.bias_modulation_rate_B = 20; % Cycles per second modulation rate on Column B. 0 = no modulation. 20 for 20Hz sine wave
@@ -72,7 +105,9 @@ Notable parameters:
    p.stim_uV = 2000;              % Size of conditioning stimulus (0 can be used as a sham stimulus)
 
 
-Tetanic conditioning:  An open loop conditioning method that applies random stimulation on the units of a specific column.  This is an important control for other stimulation methods.
+Tetanic conditioning:  An open loop conditioning method that applies random 
+stimulation on the units of a specific column.  This is an important control 
+for other stimulation methods.
 Notable parameters:
    p.conditioning_method = 5; % Tetanic stimulation: 4 = Column A, 5 = Column B, 6 = Colunm C
    p.tetanic_freq = 10;       % Max stims/sec for exponentially distributed tetanic conditioning 
@@ -82,7 +117,8 @@ Notable parameters:
    p.bias_modulation_amount = 0; % Normally 0.  Can put a 0.2 to 0.4 step bias spike increase on Column B.
 
 
-EMG triggered conditioning:  A closed loop conditioning method that applies stimuli on Column B when the synthetic EMG level of Column A crosses a threshold.
+EMG triggered conditioning:  A closed loop conditioning method that applies 
+stimuli on Column B when the synthetic EMG level of Column A crosses a threshold.
 Notable parameters:
    p.conditioning_method = 7;  % Select EMG triggered stimulation
    p.lfp_detect_level = 1000;  % EMG detection level
@@ -93,7 +129,8 @@ Notable parameters:
    p.stim_uV = 2000;        % Size of conditioning stimulus (0 can be used as a sham stimulus)
 
 
-Gamma triggered conditioning:  A closed loop conditioning method that applies stimuli to Column B when the band-passed LFP of Column A crosses a threshold.
+Gamma triggered conditioning:  A closed loop conditioning method that applies 
+stimuli to Column B when the band-passed LFP of Column A crosses a threshold.
 Notable parameters:
    p.conditioning_method = 8;  % Select gamma triggered stimulation
    p.stim_delay_ms = 0;          % Millisecond delay between gamma level
@@ -104,14 +141,29 @@ Notable parameters:
    p.stim_uV = 2000;        % Size of conditioning stimulus (0 can be used as a sham stimulus)
 
 
-Most parameters are set within the first 200 lines of the main simulation script.  The following is a list of parameters that have not yet been described but have been modified in some previously run simulations and so are likely to be altered in future simulations.
-The following parameters are used to control the length of each training phase.  Larger values for p.ntrials_off will allow the network to settle for longer during the preconditioning phase at the expense of longer simulation times.
+Most parameters are set within the first 200 lines of the main simulation script.  
+The following is a list of parameters that have not yet been described but have 
+been modified in some previously run simulations and so are likely to be altered 
+in future simulations.
+
+The following parameters are used to control the length of each training phase. 
+Larger values for p.ntrials_off will allow the network to settle for longer during 
+the preconditioning phase at the expense of longer simulation times.
+
 p.ntrials_off = 50;     % Number of initial trials with conditioning off (STDP training on).
 p.ntrials_on = 50;      % Number of following trials with conditioning on (STDP training on).
 p.ntrials_test = 50;    % Number of trials for summary figures (both conditioning and STDP training off)
 p.ntrials_repeat = 1;   % Number of repetitions through the off/test/on/test cycle.
 
-The firing threshold for units can be increased to lower overall firing rates, but must be balanced against the external bias input rates.  The correlated external biases are only correlated within each individual column.  Increasing the correlated fraction will tend to increase firing rates and also improve conditioning effects that depend on intercolumn correlated activity such as spike triggered stimulation.  Output units only receive uncorrelated bias spikes, the rate of which can be adjusted independently.
+
+The firing threshold for units can be increased to lower overall firing rates, 
+but must be balanced against the external bias input rates.  The correlated 
+external biases are only correlated within each individual column.  Increasing 
+the correlated fraction will tend to increase firing rates and also improve 
+conditioning effects that depend on intercolumn correlated activity such as 
+spike-triggered stimulation.  Output units only receive uncorrelated bias spikes, 
+the rate of which can be adjusted independently.
+
 p.threshold = 5000;   % uV threshold for all cortical units
 p.bias_value = 350;   % uV strenth of bias potientials
 p.bias_rate = 1800;   % Bias spikes per second to each column unit. Consider smaller values if biases are modulated.
@@ -120,12 +172,34 @@ p.correlated_bias_std_ms = 3;      % Standard deviation of the normally distribu
 p.out_bias_rate = 2000;            % Number of uncorrelated bias spikes per second for output units.
 
 
-The training rate and weakening factors can be altered to change the how fast connection strengths change.  Decreasing the training_rate usually means the network will need to train longer, but if the value is too high then there will be more variability in weights and it may seem like the network doesn‚Äôt settle down.  Increasing the weakening factor controls the effectiveness of the weakening side (negative post-presynaptic spike time differences) of the STDP curve relative to the strengthening side (positive post-presynaptic spike time differences).  Decreasing the weakening factor can increase the overall activity of the network, but at a certain point all weights will tend to increase to the maximum allowed value.  Typically we want to have the weaking factor large enough to prevent that but not so large that connections in the network cannot be conditioned.  This will also be affected by the shape of the curve which is controlled by fast and slow decay constants for both halves of the STDP function.
+The training rate and weakening factors can be altered to change the how fast 
+connection strengths change.  Decreasing the training_rate usually means the 
+network will need to train longer, but if the value is too high then there will 
+be more variability in weights and it may seem like the network doesnít settle 
+down.  Increasing the weakening factor controls the effectiveness of the 
+weakening side (negative post-presynaptic spike time differences) of the STDP 
+curve relative to the strengthening side (positive post-presynaptic spike time 
+differences).  Decreasing the weakening factor can increase the overall activity 
+of the network, but at a certain point all weights will tend to increase to the 
+maximum allowed value.  Typically we want to have the weaking factor large enough 
+to prevent that but not so large that connections in the network cannot be 
+conditioned.  This will also be affected by the shape of the curve which is 
+controlled by fast and slow decay constants for both halves of the STDP function.
+
 p.training_rate = 100;    % Train rate factor for both strengthing (pos) and weakening (neg) sides of the SDTP rule.
 p.train_weakening = 0.55; % Relative amplitude for the weakening side of the SDTP curve.
 
 
-The network topology can be changed by altering the column connection definitions.  Initial weights are from a uniform distribution between a minimum and maximum value.  The connection probability for excitatory units is usually 1/6, but can be increased to provide increased network activity.  Inhibitory connections are only within column and have a larger connection probability to help balance the number of inhibitory vs excitatory connections in the network.  The random seed allows the use of the same set of pseudo-random connections for many different simulations.  The initial network configuration can have a significant effect on the outcome, so being able to reuse a network configuration is important.
+The network topology can be changed by altering the column connection definitions.  
+Initial weights are from a uniform distribution between a minimum and maximum value.  
+The connection probability for excitatory units is usually 1/6, but can be increased 
+to provide increased network activity.  Inhibitory connections are only within column 
+and have a larger connection probability to help balance the number of inhibitory vs 
+excitatory connections in the network.  The random seed allows the use of the same 
+set of pseudo-random connections for many different simulations.  The initial network 
+configuration can have a significant effect on the outcome, so being able to reuse a 
+network configuration is important.
+
 % Initial PSP ranges in uV.  Arrays are [uVmin uVmax pChanceForConnection enableTraining]
 p.initmin = 100;
 p.initmax = 300;
