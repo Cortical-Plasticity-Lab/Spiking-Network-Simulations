@@ -19,6 +19,7 @@ spikenet_cycle_trig.m  -- Configured for cycle triggered conditioning
 spikenet_tetanic.m  -- Configured for tetanic conditioning
 spikenet_emg_trig  -- Configured for EMG triggered conditioning
 spikenet_gamma_trig  -- Configured for gamma filtered LFP triggered conditioning
+spikenet_FICspike_trig.m  -- Configured for spike triggered conditioning with Fixed Intracolumn Connections
 spikenet50mex.c  -- The mex function that runs the network in blocks of 10 seconds
 spikenet50mex.mexw64  -- Precompiled Matlab mex function
 spikenet_wfig.m  -- Creates a weight figure from a simulation’s saved param.mat file.
@@ -140,6 +141,20 @@ Notable parameters:
    p.stim_pulse_train = 1;  % Can be 2 or 3 for stimulus trains of 2 or 3 pulses per train.
    p.stim_uV = 2000;        % Size of conditioning stimulus (0 can be used as a sham stimulus)
 
+Spike triggered conditioning with Fixed Intracolumn Connections (FIC): Similar to normal spike triggered conditioning
+except that FIC assumes the role of the correlated bias inputs to provide correlated activity within each column.
+   p.conditioning_type = 1;
+   p.bias_corrrelated_fraction = 0.0
+   p.initmin = 200;  % Full connectivity for intracolumn connections fixed between 200-300 uV.
+   p.initmax = 300;
+   p.epsp2excit_incol = [p.initmin p.initmax 1 0];     % Epsp for connections to excitatory units within a column
+   p.epsp2inhib_incol = [p.initmin p.initmax 1 0];     % Epsp for connections to inhibitory units within a column
+   p.ipsp2excit_incol = [-p.initmax -p.initmin 1 0];   % Ipsp for connections to excitatory units within a column
+   p.ipsp2inhib_incol = [-p.initmax -p.initmin 1 0];   % Ipsp for connections to inhibitory units within a column
+   p.stim_delay_ms = 10;    % Millisecond delay between spike on Ae1 and stimulus on Column B.
+   p.stim_pulse_train = 1;  % Can be 2 or 3 for stimulus trains of 2 or 3 pulses per train.
+   p.stim_uV = 2000;        % Size of conditioning stimulus (0 can be used as a sham stimulus)
+   p.stim_refractory_ms = 10;  % Refractory period on delivered stimulation.
 
 Most parameters are set within the first 200 lines of the main simulation script.  
 The following is a list of parameters that have not yet been described but have 
