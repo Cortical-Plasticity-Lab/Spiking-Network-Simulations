@@ -1,6 +1,6 @@
 # Spiking Network Simulations #
 
-_Secions_
+_Sections_
 * **[Code Summary](#simulation-scripts)**
 * **[Running Simulations](#use)**
 * **[Troubleshooting](#setup)**
