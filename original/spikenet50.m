@@ -39,9 +39,9 @@ p.stim_pulse_train = 1;        % Pulses in the 300 Hz stim pulse train for condi
 p.stim_pulse_freq = 300;       % Interstimulus interval for stimlus trains (this will be converted to an integer number of timesteps)
 p.stim_phase = 0;              % Cycle triggered stim phase, 0 = rising, 90 = peak, 180 = falling, 270 = trough. These phases are fairly exact, others are interpolated from these points. Phases between 46..89 and 316..359 have the most interpolation variability.
 p.stim_refractory_ms = 10;     % Refractory period on spike triggered and LFP cycle triggered stimulation
-p.lfp_detect_level = 30000;    % Amplitude of LFP used for cycle triggered conditioning (use 30000 for cycle triggered +/-20%, -20000 or so for gamma triggered depending on %correlated bias drive, 1000 for EMG triggered
+p.LFP_detect_level = 30000;    % Amplitude of LFP used for cycle triggered conditioning (use 30000 for cycle triggered +/-20%, -20000 or so for gamma triggered depending on %correlated bias drive, 1000 for EMG triggered
 p.gamma_band = [50 80];        % Bandwidth for conditioning_type in Hz (for example [50 80] for 50Hz to 80Hz bandpass filter.
-p.emg_band = [100 2500];       % Column A motor output filter (Hz) for EMG triggered stimulation.
+p.EMG_band = [100 2500];       % Column A motor output filter (Hz) for EMG triggered stimulation.
 p.conditioning_secs = 10;      % Seconds in each trial used for conditioning.  Limits conditioning to beginning of each 10 second trial.
 p.bias_modulation_rate_A = 0;  % Cycles per second modulation rate on Column A. 0 = no modulation. 19, 20, or 21 for sine wave
 p.bias_modulation_rate_B = 0;  % Cycles per second modulation rate on Column B. 0 = no modulation. 20 for 20Hz sine wave
@@ -116,11 +116,11 @@ p.PSP_fast_time_constant_ms = 0.8; % Time constants are in milliseconds
 
 p.bias_value = 350;                % uV strenth of bias potientials
 p.bias_rate = 1800;                % Bias spikes per second to each column unit. Consider smaller values if biases are modulated.
-p.bias_corrrelated_fraction = .30; % Fraction of correlated bias spikes
+p.bias_correlated_fraction = .30; % Fraction of correlated bias spikes
 p.correlated_bias_std_ms = 3;      % <= 5ms. Standard deviation of the normally distributed (correlated) bias spikes (in milliseconds)
 p.out_bias_rate = 2000;            % Number of uncorrelated bias spikes per second for output units.
 
-p.correlated_bias_rate = p.bias_corrrelated_fraction * p.bias_rate; % Correlated bias spikes per second delivered to each unit in a column. These will cause common input peaks in cross-correlations of same column units.
+p.correlated_bias_rate = p.bias_correlated_fraction * p.bias_rate; % Correlated bias spikes per second delivered to each unit in a column. These will cause common input peaks in cross-correlations of same column units.
 p.uncorrelated_bias_rate = p.bias_rate - p.correlated_bias_rate;    % Number of bias spikes per second for normal firing rate.
 
 % Weight limits.  Weight dependence slows down weight changes as a weight
@@ -137,13 +137,13 @@ p.weight_dependence = 0.0; % 0.001 for almost no weight dependence. Maximum of 1
 % Initial PSP ranges in uV.  Arrays are [uVmin uVmax pChanceForConnection enableTraining]
 p.initmin = 100;
 p.initmax = 300;
-p.epsp2excit_incol = [p.initmin p.initmax 1/6 1];     % Epsp for connections to excitatory units within a column
-p.epsp2inhib_incol = [p.initmin p.initmax 1/6 1];     % Epsp for connections to inhibitory units within a column
-p.epsp2excit_outcol = [p.initmin p.initmax 1/6 1];    % Epsp for connections to excitatory units in adjacent columns
-p.epsp2inhib_outcol = [p.initmin p.initmax 1/6 1];    % Epsp for connections to inhibitory units in adjacent columns
-p.ipsp2excit_incol = [-p.initmax -p.initmin 1/3 1];   % Ipsp for connections to excitatory units within a column
-p.ipsp2inhib_incol = [-p.initmax -p.initmin 1/3 1];   % Ipsp for connections to inhibitory units within a column
-p.epsp2output_incol = [350 350 1/3 0];    % Epsp for connections to output units.  These are not usually trained. Negative connection chance means first p * N units rather than random chance.
+p.EPSP_2_excit_incol = [p.initmin p.initmax 1/6 1];     % EPSP for connections to excitatory units within a column
+p.EPSP_2_inhib_incol = [p.initmin p.initmax 1/6 1];     % EPSP for connections to inhibitory units within a column
+p.EPSP_2_excit_outcol = [p.initmin p.initmax 1/6 1];    % EPSP for connections to excitatory units in adjacent columns
+p.EPSP_2_inhib_outcol = [p.initmin p.initmax 1/6 1];    % EPSP for connections to inhibitory units in adjacent columns
+p.IPSP_2_excit_incol = [-p.initmax -p.initmin 1/3 1];   % IPSP for connections to excitatory units within a column
+p.IPSP_2_inhib_incol = [-p.initmax -p.initmin 1/3 1];   % IPSP for connections to inhibitory units within a column
+p.EPSP_2_output_incol = [350 350 1/3 0];    % EPSP for connections to output units.  These are not usually trained. Negative connection chance means first p * N units rather than random chance.
 
 p.training_rate = 100;    % Train rate factor for both strengthing (pos) and weakening (neg) sides of the SDTP rule.
 p.train_weakening = 0.55; % Relative amplitude for the weakening side of the SDTP curve.
@@ -209,21 +209,21 @@ rng(p.random_seed);        % Seed random number generator
 p.version_id = mfilename;  % Use file name as a program identifier.
 p.fs = min(100000, max(10000, round(p.fs / 10000) * 10000)); % Make sure p.fs is multiple of 10000 between 10000 and 100000.
 p.msfs = round(p.fs / 1000); % Time steps per millisecond.
-p.axonal_delay = floor(p.axonal_delay_ms * p.msfs);  % axonal psp delay in timesteps
-p.dendritic_delay = floor(p.dendritic_delay_ms * p.msfs);  % dendridic psp delay in timesteps
+p.axonal_delay = floor(p.axonal_delay_ms * p.msfs);  % axonal PSP delay in timesteps
+p.dendritic_delay = floor(p.dendritic_delay_ms * p.msfs);  % dendridic PSP delay in timesteps
 p.conduction_delay = p.axonal_delay + p.dendritic_delay;   % total conduction time in timesteps
 p.output_delay = floor(p.output_delay_ms * p.msfs);        % Connection delay for any connection to an output unit.
 p.stim_delay = floor(p.stim_delay_ms * p.msfs);            % stimulation delay in timesteps
 p.stim_refractory = floor(p.stim_refractory_ms * p.msfs);  % stimulation refractory
 [p.gamma_filter_b, p.gamma_filter_a] = butter(1, p.gamma_band / (p.fs / 2)); % LFP_A filter for gamma triggered stimulation
 [p.beta_filter_b, p.beta_filter_a] = butter(1, p.beta_band / (p.fs / 2)); % LFP_B filter for cycle triggered stimulation
-[p.emg_filter_b, p.emg_filter_a] = butter(1, p.emg_band / (p.fs / 2)); % Motor output filter for emg triggered stimulation
+[p.EMG_filter_b, p.EMG_filter_a] = butter(1, p.EMG_band / (p.fs / 2)); % Motor output filter for EMG triggered stimulation
 
 % Convert time constants into decay factors for PSP and STDP shapes
 % (this is Eulers method used for estimating an exponential decay function)
 p.timestep2ms = 1000 / p.fs; % Milliseconds per timestep
-p.psp_slow_decay = 1 - p.timestep2ms / p.PSP_slow_time_constant_ms; 
-p.psp_fast_decay = 1 - p.timestep2ms / p.PSP_fast_time_constant_ms;   
+p.PSP_slow_decay = 1 - p.timestep2ms / p.PSP_slow_time_constant_ms; 
+p.PSP_fast_decay = 1 - p.timestep2ms / p.PSP_fast_time_constant_ms;   
 p.train_pos_slow_decay = 1 - p.timestep2ms / p.STDP_strengthening_slow_time_constant_ms;   % Shape of strengthening STDP rule.
 p.train_pos_fast_decay = 1 - p.timestep2ms / p.STDP_strengthening_fast_time_constant_ms;
 p.train_neg_slow_decay = 1 - p.timestep2ms / p.STDP_weakening_slow_time_constant_ms;       % Shape of weakening STDP rule.
@@ -242,7 +242,7 @@ p.correlated_bias_max_timesteps = 8 * p.correlated_bias_std_ms * p.msfs;
 p.normal_pdf_table = round(random('norm', 0.5 * p.correlated_bias_max_timesteps, p.correlated_bias_std_ms * p.msfs, [100000, 1])); % used for correlated bias spikes
 p.normal_pdf_table((p.normal_pdf_table < 0) | (p.normal_pdf_table > p.correlated_bias_max_timesteps)) = [];  % remove elements more than 4 standard deviations from mean.
 p.normal_pdf_table = uint16(p.normal_pdf_table(1:2^16));
-coffset = round(mean(p.normal_pdf_table));  % clocktick offset for any modulation of correlated bias inputs.  This is just the mean all possible time adjustments.
+p.c_offset = round(mean(p.normal_pdf_table));  % clocktick offset for any modulation of correlated bias inputs.  This is just the mean all possible time adjustments.
 
 % Define the number of biases, units, and weights.
 % Biases are used to give units background activity.  This activity can be
@@ -275,7 +275,7 @@ p.unit_pre_count = zeros(p.units, 1, 'uint16');   % Number of presynaptic units
 p.unit_post_count = zeros(p.units, 1, 'uint16');  % Number of postsynaptic units
 p.unit_pre_offset = zeros(p.units, 1, 'uint32');  % Zero based offset into weight_pre_sort
 p.unit_post_offset = zeros(p.units, 1, 'uint32'); % Zero based offset into wieght_post_sort
-p.unit_lfp_offset = zeros(p.units, 1, 'uint16');  % Zero based offset into LFP array
+p.unit_LFP_offset = zeros(p.units, 1, 'uint16');  % Zero based offset into LFP array
 p.unit_column_id = zeros(p.units, 1, 'uint16');   % 0=Col A unit, 1 = B, 2 = C, output units have 16384 added
 p.unit_stim_source = zeros(p.units, 1, 'uint16'); % Flag for each unit. 1 if used as a stim source.  Filled in by InitDone()
 p.unit_stim_target = zeros(p.units, 1, 'uint16'); % Flag for each unit. 1 if used as a stim target.  Filled in by InitDone()
@@ -399,13 +399,13 @@ if p.bias_modulation_rate_A > 0
             index1 = offset + cycle_start;
             index2 = index1 + floor(7 * p.fs / p.bias_modulation_rate_A);
             uncorrelated_rate1(index1:index2) = uncorrelated_rate1(index1:index2) .* sine_mod(1:index2-index1+1);
-            correlated_rate1(index1-coffset:index2-coffset) = correlated_rate1(index1-coffset:index2-coffset) .* sine_mod(1:index2-index1+1);
+            correlated_rate1(index1-p.c_offset:index2-p.c_offset) = correlated_rate1(index1-p.c_offset:index2-p.c_offset) .* sine_mod(1:index2-index1+1);
         end
     end
 end
 
-p.postlfp_test_sample = floor(0.25 * p.fs + 1);  % Conditioning type 3 cycle triggered pre-oscillation test pulse time.
-p.prelfp_test_sample = floor(p.conditioning_secs * p.fs + .1 * p.fs + 1);  % Conditioning type 3 cycle triggered post-oscillation test pulse time.
+p.post_LFP_test_sample = floor(0.25 * p.fs + 1);  % Conditioning type 3 cycle triggered pre-oscillation test pulse time.
+p.pre_LFP_test_sample = floor(p.conditioning_secs * p.fs + .1 * p.fs + 1);  % Conditioning type 3 cycle triggered post-oscillation test pulse time.
 p.test_index = floor([.3 1.1 2.3] * p.fs); % Test pulses for cycle triggered conditioning, [pre-cycles test, post-cycles test, next pre-cycle test]
 if p.bias_modulation_rate_B > 0
     sine_mod = 0.5 * (1 + sin((1:p.time_steps) * 2 * pi * p.bias_modulation_rate_B / p.fs));
@@ -417,7 +417,7 @@ if p.bias_modulation_rate_B > 0
             index1 = offset + cycle_start;
             index2 = index1 + floor(7 * p.fs / p.bias_modulation_rate_B);
             uncorrelated_rate2(index1:index2) = uncorrelated_rate2(index1:index2) .* sine_mod(1:index2-index1+1);
-            correlated_rate2(index1-coffset:index2-coffset) = correlated_rate2(index1-coffset:index2-coffset) .* sine_mod(1:index2-index1+1);
+            correlated_rate2(index1-p.c_offset:index2-p.c_offset) = correlated_rate2(index1-p.c_offset:index2-p.c_offset) .* sine_mod(1:index2-index1+1);
             if (p.conditioning_type == 3) && (p.bias_modulation_step_secs < 5)
                 p.stim_target_times(floor(p.test_index + offset)) = 1;  % Pre and post cycle test pulses go into target stim_target_time so they will not be marked as conditioning triggers.
             end
@@ -434,19 +434,19 @@ if p.bias_modulation_rate_C > 0
             index1 = offset + cycle_start;
             index2 = index1 + floor(7 * p.fs / p.bias_modulation_rate_C);
             uncorrelated_rate3(index1:index2) = uncorrelated_rate3(index1:index2) .* sine_mod(1:index2-index1+1);
-            correlated_rate3(index1-coffset:index2-coffset) = correlated_rate3(index1-coffset:index2-coffset) .* sine_mod(1:index2-index1+1);
+            correlated_rate3(index1-p.c_offset:index2-p.c_offset) = correlated_rate3(index1-p.c_offset:index2-p.c_offset) .* sine_mod(1:index2-index1+1);
         end
     end
 end
 
-% Cycle triggered stimulation based on LFPB threshold crossings.
+% Cycle triggered stimulation based on LFP_B threshold crossings.
 p.stim_phase_sine = sin(p.stim_phase * pi / 180); % Used to calculate amplitude level where stimulation should occur.
 if (p.stim_phase < 0)
     p.stim_phase = p.stim_phase + 360;
 end
 if p.conditioning_type == 3
     if (p.stim_phase < 90) || (p.stim_phase >= 270)
-        p.lfp_detect_level = -p.lfp_detect_level; % Trigger on rising through an amplitude level after falling below negative detect level
+        p.LFP_detect_level = -p.LFP_detect_level; % Trigger on rising through an amplitude level after falling below negative detect level
     end
 end
 
@@ -477,35 +477,35 @@ Init_Unit('Co', p.n_out, p.output_threshold_range, 2 + 16384, 7, 13);
 
 % Fill in connection information
 
-Init_Weight('Ae', 1:p.n_excit, 'Ae', 1:p.n_excit, p.epsp2excit_incol);
-Init_Weight('Ae', 1:p.n_excit, 'Ai', 1:p.n_inhib, p.epsp2inhib_incol);
-Init_Weight('Ae', 1:p.n_excit, 'Be', 1:p.n_excit, p.epsp2excit_outcol);
-Init_Weight('Ae', 1:p.n_excit, 'Bi', 1:p.n_inhib, p.epsp2inhib_outcol);
-Init_Weight('Ae', 1:p.n_excit, 'Ce', 1:p.n_excit, p.epsp2excit_outcol);
-Init_Weight('Ae', 1:p.n_excit, 'Ci', 1:p.n_inhib, p.epsp2inhib_outcol);
-Init_Weight('Ai', 1:p.n_inhib, 'Ae', 1:p.n_excit, p.ipsp2excit_incol);
-Init_Weight('Ai', 1:p.n_inhib, 'Ai', 1:p.n_inhib, p.ipsp2inhib_incol);
-Init_Weight('Ae', 1:p.n_excit, 'Ao', 1:p.n_out, p.epsp2output_incol);
+Init_Weight('Ae', 1:p.n_excit, 'Ae', 1:p.n_excit, p.EPSP_2_excit_incol);
+Init_Weight('Ae', 1:p.n_excit, 'Ai', 1:p.n_inhib, p.EPSP_2_inhib_incol);
+Init_Weight('Ae', 1:p.n_excit, 'Be', 1:p.n_excit, p.EPSP_2_excit_outcol);
+Init_Weight('Ae', 1:p.n_excit, 'Bi', 1:p.n_inhib, p.EPSP_2_inhib_outcol);
+Init_Weight('Ae', 1:p.n_excit, 'Ce', 1:p.n_excit, p.EPSP_2_excit_outcol);
+Init_Weight('Ae', 1:p.n_excit, 'Ci', 1:p.n_inhib, p.EPSP_2_inhib_outcol);
+Init_Weight('Ai', 1:p.n_inhib, 'Ae', 1:p.n_excit, p.IPSP_2_excit_incol);
+Init_Weight('Ai', 1:p.n_inhib, 'Ai', 1:p.n_inhib, p.IPSP_2_inhib_incol);
+Init_Weight('Ae', 1:p.n_excit, 'Ao', 1:p.n_out, p.EPSP_2_output_incol);
 
-Init_Weight('Be', 1:p.n_excit, 'Be', 1:p.n_excit, p.epsp2excit_incol);
-Init_Weight('Be', 1:p.n_excit, 'Bi', 1:p.n_inhib, p.epsp2inhib_incol);
-Init_Weight('Be', 1:p.n_excit, 'Ae', 1:p.n_excit, p.epsp2excit_outcol);
-Init_Weight('Be', 1:p.n_excit, 'Ai', 1:p.n_inhib, p.epsp2inhib_outcol);
-Init_Weight('Be', 1:p.n_excit, 'Ce', 1:p.n_excit, p.epsp2excit_outcol);
-Init_Weight('Be', 1:p.n_excit, 'Ci', 1:p.n_inhib, p.epsp2inhib_outcol);
-Init_Weight('Bi', 1:p.n_inhib, 'Be', 1:p.n_excit, p.ipsp2excit_incol);
-Init_Weight('Bi', 1:p.n_inhib, 'Bi', 1:p.n_inhib, p.ipsp2inhib_incol);
-Init_Weight('Be', 1:p.n_excit, 'Bo', 1:p.n_out, p.epsp2output_incol);
+Init_Weight('Be', 1:p.n_excit, 'Be', 1:p.n_excit, p.EPSP_2_excit_incol);
+Init_Weight('Be', 1:p.n_excit, 'Bi', 1:p.n_inhib, p.EPSP_2_inhib_incol);
+Init_Weight('Be', 1:p.n_excit, 'Ae', 1:p.n_excit, p.EPSP_2_excit_outcol);
+Init_Weight('Be', 1:p.n_excit, 'Ai', 1:p.n_inhib, p.EPSP_2_inhib_outcol);
+Init_Weight('Be', 1:p.n_excit, 'Ce', 1:p.n_excit, p.EPSP_2_excit_outcol);
+Init_Weight('Be', 1:p.n_excit, 'Ci', 1:p.n_inhib, p.EPSP_2_inhib_outcol);
+Init_Weight('Bi', 1:p.n_inhib, 'Be', 1:p.n_excit, p.IPSP_2_excit_incol);
+Init_Weight('Bi', 1:p.n_inhib, 'Bi', 1:p.n_inhib, p.IPSP_2_inhib_incol);
+Init_Weight('Be', 1:p.n_excit, 'Bo', 1:p.n_out, p.EPSP_2_output_incol);
 
-Init_Weight('Ce', 1:p.n_excit, 'Ce', 1:p.n_excit, p.epsp2excit_incol);
-Init_Weight('Ce', 1:p.n_excit, 'Ci', 1:p.n_inhib, p.epsp2inhib_incol);
-Init_Weight('Ce', 1:p.n_excit, 'Be', 1:p.n_excit, p.epsp2excit_outcol);
-Init_Weight('Ce', 1:p.n_excit, 'Bi', 1:p.n_inhib, p.epsp2inhib_outcol);
-Init_Weight('Ce', 1:p.n_excit, 'Ae', 1:p.n_excit, p.epsp2excit_outcol);
-Init_Weight('Ce', 1:p.n_excit, 'Ai', 1:p.n_inhib, p.epsp2inhib_outcol);
-Init_Weight('Ci', 1:p.n_inhib, 'Ce', 1:p.n_excit, p.ipsp2excit_incol);
-Init_Weight('Ci', 1:p.n_inhib, 'Ci', 1:p.n_inhib, p.ipsp2inhib_incol);
-Init_Weight('Ce', 1:p.n_excit, 'Co', 1:p.n_out, p.epsp2output_incol);
+Init_Weight('Ce', 1:p.n_excit, 'Ce', 1:p.n_excit, p.EPSP_2_excit_incol);
+Init_Weight('Ce', 1:p.n_excit, 'Ci', 1:p.n_inhib, p.EPSP_2_inhib_incol);
+Init_Weight('Ce', 1:p.n_excit, 'Be', 1:p.n_excit, p.EPSP_2_excit_outcol);
+Init_Weight('Ce', 1:p.n_excit, 'Bi', 1:p.n_inhib, p.EPSP_2_inhib_outcol);
+Init_Weight('Ce', 1:p.n_excit, 'Ae', 1:p.n_excit, p.EPSP_2_excit_outcol);
+Init_Weight('Ce', 1:p.n_excit, 'Ai', 1:p.n_inhib, p.EPSP_2_inhib_outcol);
+Init_Weight('Ci', 1:p.n_inhib, 'Ce', 1:p.n_excit, p.IPSP_2_excit_incol);
+Init_Weight('Ci', 1:p.n_inhib, 'Ci', 1:p.n_inhib, p.IPSP_2_inhib_incol);
+Init_Weight('Ce', 1:p.n_excit, 'Co', 1:p.n_out, p.EPSP_2_output_incol);
 
 % Finish initialzation. Sort weights for speed, etc.
 
@@ -549,9 +549,9 @@ copyfile([p.mexname '.mexw64'], [foldername '\' p.mexname '.mexw64'], 'f');
 sweeps = zeros(p.time_steps, p.units); % spike histogram for each unit.
 sweep_count = 0;
 activity = zeros(p.units, p.time_steps, 'double'); % Save 10 seconds of activity for each unit.
-p.lfp_count = max(p.unit_lfp_offset) + 1;  % If there are inhibitory connections to output units, then use + 4 (since iLFP is stored 3 indexes beyond eLFP)
-lfp = zeros(p.lfp_count, p.time_steps, 'double');  % LFP separated by unit type and column.
-p.lfp_cycle_tests = zeros(0, 3);
+p.LFP_count = max(p.unit_LFP_offset) + 1;  % If there are inhibitory connections to output units, then use + 4 (since iLFP is stored 3 indexes beyond eLFP)
+LFP = zeros(p.LFP_count, p.time_steps, 'double');  % LFP separated by unit type and column.
+p.LFP_cycle_tests = zeros(0, 3);
 evoked_potentials = zeros(9, 0);  % Evoked potential (max of test range LFP - mean of baseline LFP).
 
 % This is our progress figure.
@@ -616,8 +616,8 @@ for itrial = 1:p.ntrials
         p.sequence_counter = 1;
         section_label = 'Training with conditioning';
         % Save test stim triggered LFP from previous section
-        avetestlfp = avelfp;
-        avetestlfp_sweeps = avelfp_sweeps;
+        avetestLFP = aveLFP;
+        avetestLFP_sweeps = aveLFP_sweeps;
         statest = sta;
         statest_sweeps = sta_sweeps;
     elseif iseq == sequence_start_test2
@@ -636,13 +636,13 @@ for itrial = 1:p.ntrials
     if p.sequence_counter == 1  % Restart averages at the begining of each sequence section.
         sta_sweeps = zeros(p.units,1);
         sta = zeros(p.units, nbins); 
-        avelfp = zeros(40,nbins);
-        avelfp_sweeps = 0;
+        aveLFP = zeros(40,nbins);
+        aveLFP_sweeps = 0;
         psth = zeros(length(psthscale), npsth+10);
         psthn = zeros(1, npsth+10);
         sweeps = zeros(p.time_steps, p.units);
         sweep_count = 0;
-        lfpstore = zeros(p.n_cols, 0);
+        LFPstore = zeros(p.n_cols, 0);
         p.sumWeights_A_to_B = zeros(1,p.time_steps); % Simulation sums weights A->B for specific training types.
     end
 
@@ -674,7 +674,7 @@ for itrial = 1:p.ntrials
     % stimulations for later.
     p.stim_output_times = zeros(p.time_steps, 1, 'uint16'); % Will record the timesteps where conditioning stimuli were delivered.
     p.trigger_times = zeros(p.time_steps, 1, 'uint16');     % Clockticks where the conditioning triggers were detected (even if conditioning is turned off)
-    [iUnit, tSpike] = spikenet50mex(p, activity, lfp);
+    [iUnit, tSpike] = spikenet50mex(p, activity, LFP);
     trig_timestamps = find(p.trigger_times == 1);           % Convert to list of timestamps   
     short = find(diff(trig_timestamps) < p.stim_refractory);%   .. and remove short intervals (stim train intervals are 3.3 ms)
     if ~isempty(short)
@@ -733,7 +733,7 @@ for itrial = 1:p.ntrials
     end
     
     plotnames = {'Ae'; 'Be'; 'Ce'; 'Ao'; 'Bo'; 'Co'};
-    lfpnames = {'A'; 'B'; 'C'; 'A-'; 'B-'; 'C-'; 'A0'; 'B0'; 'C0'};
+    LFPnames = {'A'; 'B'; 'C'; 'A-'; 'B-'; 'C-'; 'A0'; 'B0'; 'C0'};
     condnames = {'No Conditioning'; 'ST'; 'PP'; 'CT'; 'Tetanic-A'; 'Tetanic-B'; 'Tetanic-C'; 'ET'; 'GT'; 'AT'};
     sweep_count = sweep_count + 1;
     for iplot = 1:6
@@ -786,19 +786,19 @@ for itrial = 1:p.ntrials
         [b, a] = butter(1, [10 2500] / (p.fs / 2)); %10Hz to 2500Hz butterworth filter
         for iplot = 1:9
             iu = source(iplot);
-            ilfp = dest(iplot);
+            iLFP = dest(iplot);
             
             % Single unit spike triggered averages for first unit in each
             % column.  Leave out seconds 8-10 which are involved in stimulus testing.
             ts1 = tSpike(iUnit == iu);  % Spikes from first unit in source column (e.g Ae1 -> Col B)
-            lfppos = filter(b, a, lfp(ilfp, :));
-            lfpneg = filter(b, a, lfp(ilfp+3, :));
+            LFPpos = filter(b, a, LFP(iLFP, :));
+            LFPneg = filter(b, a, LFP(iLFP+3, :));
             for ispk = length(ts1):-1:1
                 t1 = ts1(ispk);
                 if (t1 > nbins) && (t1 <= 7.5 * p.fs - maxbin)
                     sta_sweeps(iplot) = sta_sweeps(iplot) + 1;
-                    sta(iplot, :) = sta(iplot, :) + lfppos((t1 - prebins + 1):(t1 + maxbin));
-                    sta(iplot+50, :) = sta(iplot+50, :) + lfpneg((t1 - prebins + 1):(t1 + maxbin));
+                    sta(iplot, :) = sta(iplot, :) + LFPpos((t1 - prebins + 1):(t1 + maxbin));
+                    sta(iplot+50, :) = sta(iplot+50, :) + LFPneg((t1 - prebins + 1):(t1 + maxbin));
                 end
             end
             
@@ -809,7 +809,7 @@ for itrial = 1:p.ntrials
                     t1 = ts1(ispk);
                     if (t1 > nbins) && (t1 <= 75000 - maxbin)
                         sta_sweeps(iplot+60) = sta_sweeps(iplot+60) + 1;
-                        sta(iplot+60, :) = sta(iplot+60, :) + lfpneg((t1 - prebins + 1):(t1 + maxbin)) + lfppos((t1 - prebins + 1):(t1 + maxbin));
+                        sta(iplot+60, :) = sta(iplot+60, :) + LFPneg((t1 - prebins + 1):(t1 + maxbin)) + LFPpos((t1 - prebins + 1):(t1 + maxbin));
                     end
                 end
             end
@@ -818,14 +818,14 @@ for itrial = 1:p.ntrials
             % column.  Leave out seconds 8-10 which are involved in stimulus testing.
             ts1 = trig_timestamps((trig_timestamps > nbins) & (trig_timestamps <= 7.5 * p.fs - maxbin));  % Conditioning trigger events
             if iplot <= 6
-                lfppos = lfp(iplot, :);
+                LFPpos = LFP(iplot, :);
             else
-                lfppos = lfp(iplot+3, :);
+                LFPpos = LFP(iplot+3, :);
             end
             for ispk = length(ts1):-1:1
                 t1 = ts1(ispk);
                 sta_sweeps(iplot+40) = sta_sweeps(iplot+40) + 1;
-                sta(iplot+40, :) = sta(iplot+40, :) + lfppos((t1 - prebins + 1):(t1 + maxbin));
+                sta(iplot+40, :) = sta(iplot+40, :) + LFPpos((t1 - prebins + 1):(t1 + maxbin));
             end
 
             % Select correct plot
@@ -848,7 +848,7 @@ for itrial = 1:p.ntrials
             ylim([-20 20]);
             xlim([scalems(1) scalems(2)]);
             name = p.unit_names{iu};
-            xlabel([name ' -> LFP' lfpnames{ilfp} ' sta (ms), n = ' num2str(sta_sweeps(iplot))]);
+            xlabel([name ' -> LFP' LFPnames{iLFP} ' sta (ms), n = ' num2str(sta_sweeps(iplot))]);
             ylabel('mV');
             if iplot == 1
                 title('STA Unit Spike -> LFP');
@@ -861,7 +861,7 @@ for itrial = 1:p.ntrials
 
         % Update stimulus triggered LFP averages for test figures
         if (p.train_on == 0)
-            avelfp_sweeps = avelfp_sweeps + 1;
+            aveLFP_sweeps = aveLFP_sweeps + 1;
             r1 = p.fs / 20; % Number of timesteps equal to 50 milliseconds
             r2 = p.fs / 40; % 25 milliseconds
             iplot = 1;
@@ -869,34 +869,34 @@ for itrial = 1:p.ntrials
                 evoked_potentials(:, end+1) = 0; %#ok<AGROW>
             end
             for icol = 1:3
-               lfppos = filter(b, a, lfp(icol, :));
-               lfpneg = filter(b, a, lfp(icol+3, :));
-               lfpfilt = filter(b, a, lfp(icol, :) + lfp(icol+3, :));
+               LFPpos = filter(b, a, LFP(icol, :));
+               LFPneg = filter(b, a, LFP(icol+3, :));
+               LFPfilt = filter(b, a, LFP(icol, :) + LFP(icol+3, :));
                for itime = 1:3
                     isample = 1 + 8 * p.fs + (itime - 1) * 0.7 * p.fs;  % Test stims are placed at specific times
                     range = round(isample - r1) : round(isample + nbins - r1 - 1);
-                    avelfp(iplot+20, :) = avelfp(iplot+20, :) + lfppos(range); % Excite LFP
-                    avelfp(iplot+30, :) = avelfp(iplot+30, :) + lfpneg(range); % Inhib LFP
-                    avelfp(iplot, :) = avelfp(iplot, :) + lfpfilt(range); % Total LFP
-                    avelfp(iplot+10, :) = avelfp(iplot+10, :) + lfp(icol+7, range); % Synthetic EMG from output units                 
+                    aveLFP(iplot+20, :) = aveLFP(iplot+20, :) + LFPpos(range); % Excite LFP
+                    aveLFP(iplot+30, :) = aveLFP(iplot+30, :) + LFPneg(range); % Inhib LFP
+                    aveLFP(iplot, :) = aveLFP(iplot, :) + LFPfilt(range); % Total LFP
+                    aveLFP(iplot+10, :) = aveLFP(iplot+10, :) + LFP(icol+7, range); % Synthetic EMG from output units                 
                     if p.last_section_trial
                         % At the end of each testing section, calculate evoked
                         % potentials for each column to each other column
-                        evoked_potentials(iplot, end) = (max(avelfp(iplot,r1:r1+r2-1)) - mean(avelfp(iplot,r2:r1-1))) / avelfp_sweeps;
+                        evoked_potentials(iplot, end) = (max(aveLFP(iplot,r1:r1+r2-1)) - mean(aveLFP(iplot,r2:r1-1))) / aveLFP_sweeps;
                     end
                     iplot = iplot + 1;
                 end
             end
              
             % Spike triggered averages for each unit in the Ae group onto LFPB
-            lfpfilt = filter(b, a, lfp(2,:) + lfp(2+3,:));
+            LFPfilt = filter(b, a, LFP(2,:) + LFP(2+3,:));
             for iplot = 1:40
                 ts1 = tSpike(iUnit == iplot);  % Spikes from unit in source column (e.g Ae1 -> Col B)
                 for ispk = length(ts1):-1:1
                     t1 = ts1(ispk);
                     if (t1 > nbins) && (t1 <= 7.5 * p.fs - maxbin)
                         sta_sweeps(iplot+70) = sta_sweeps(iplot+70) + 1;
-                        sta(iplot+70, :) = sta(iplot+70, :) + lfpfilt((t1 - prebins + 1):(t1 + maxbin));
+                        sta(iplot+70, :) = sta(iplot+70, :) + LFPfilt((t1 - prebins + 1):(t1 + maxbin));
                     end
                 end
             end         
@@ -906,9 +906,9 @@ for itrial = 1:p.ntrials
     
     % Calculate average weight from A -> B
     index = find((p.weight_pre_unit <= p.n_excit) & (p.weight_post_unit > p.n_excit + p.n_inhib + p.n_out) & (p.weight_post_unit <= 2*p.n_excit + 2*p.n_inhib + p.n_out));
-    mean_weight_AB = mean(p.weight_strength(index)) / p.psp_factor;
+    mean_weight_AB = mean(p.weight_strength(index)) / p.PSP_factor;
     index = find((p.weight_pre_unit <= p.n_excit) & (p.weight_post_unit > 2*(p.n_excit + p.n_inhib + p.n_out)));
-    mean_weight_AC = mean(p.weight_strength(index)) / p.psp_factor;
+    mean_weight_AC = mean(p.weight_strength(index)) / p.PSP_factor;
     
     % Display progress line
     progstr = ['Sweep ' num2str(p.itrial) ' Spikes ' num2str(length(tSpike)) ' Stims ' num2str(p.train_info(3)) ' WeightAB ' num2str(mean_weight_AB) ' WeightAC ' num2str(mean_weight_AC)];
@@ -970,11 +970,11 @@ for itrial = 1:p.ntrials
         sweep_index = sweep_index((sweep_index > r2) & (sweep_index <  p.time_steps - r2));
         n = length(sweep_index);
         if n > 0
-            % Beta band filtered LFPB is stored in lfp(7,:)
+            % Beta band filtered LFPB is stored in LFP(7,:)
             xaxis_ms = (-r2:r2) / p.msfs;
             for isweep = 1:n
                 sweep_start = sweep_index(isweep) - r2;
-                sweep_ave = sweep_ave + lfp(7, sweep_start:sweep_start+r1);
+                sweep_ave = sweep_ave + LFP(7, sweep_start:sweep_start+r1);
             end
             subplot(6, 3, 12);
             plot(xaxis_ms, sweep_ave / length(sweep_index));
@@ -986,7 +986,7 @@ for itrial = 1:p.ntrials
             if n > 0
                 for isweep = 1:n
                     sweep_start = sweep_index(isweep) - r2;
-                    sweep_ave = sweep_ave + lfp(7, sweep_start:sweep_start+r1);
+                    sweep_ave = sweep_ave + LFP(7, sweep_start:sweep_start+r1);
                 end
                 subplot(6, 3, 15);
                 plot(xaxis_ms, sweep_ave / length(sweep_index));
@@ -1007,17 +1007,17 @@ for itrial = 1:p.ntrials
             xaxis_ms = (-r2:r2) / p.msfs;
             for isweep = 1:n
                 sweep_start = sweep_index(isweep) - r2;
-                sweep_ave = sweep_ave + lfp(1, sweep_start:sweep_start+r1) + lfp(4, sweep_start:sweep_start+r1);
+                sweep_ave = sweep_ave + LFP(1, sweep_start:sweep_start+r1) + LFP(4, sweep_start:sweep_start+r1);
             end
             subplot(6, 3, 12);
             plot(xaxis_ms, sweep_ave / length(sweep_index));
             xlabel(['T -> LFPA (n = ' num2str(n) ')']);
            
-            % EMG or Gamma filtered LFPA is returned in lfp(7,:)
+            % EMG or Gamma filtered LFPA is returned in LFP(7,:)
             sweep_ave = zeros(1,r1+1);
             for isweep = 1:n
                 sweep_start = sweep_index(isweep) - r2;
-                sweep_ave = sweep_ave + lfp(7, sweep_start:sweep_start+r1);
+                sweep_ave = sweep_ave + LFP(7, sweep_start:sweep_start+r1);
             end
             subplot(6, 3, 15);
             plot(xaxis_ms, sweep_ave / length(sweep_index));
@@ -1031,26 +1031,26 @@ for itrial = 1:p.ntrials
 
     % Replace last plot with a histogram of the weight distribution
     subplot(6, 3, 18);
-    hist(double(p.weight_strength((p.weight_strength ~= 0) & (p.weight_training_rule ~= 0))) / p.psp_factor, weightedges);
+    hist(double(p.weight_strength((p.weight_strength ~= 0) & (p.weight_training_rule ~= 0))) / p.PSP_factor, weightedges);
     xlim([-p.max_strength p.max_strength]);
     ylim([0 500]);
     xlabel('Trainable weight distribution');
     drawnow;
     
-    % Accumulate lfp for a limited number of iterations
+    % Accumulate LFP for a limited number of iterations
     % This is only for the PSD plot shown below the raster plot
     % Reduce the iterations allowed if space becomes an issue.
     if p.do_raster_figure && p.sequence_counter <= 200
-        for ilfp = 1:p.n_cols
-            lfpcol = lfp(ilfp,:) + lfp(ilfp+3,:);
-            samples = length(lfpcol);
-            lfpstore(ilfp,end+1:end+samples) = lfpcol;
+        for iLFP = 1:p.n_cols
+            LFPcol = LFP(iLFP,:) + LFP(iLFP+3,:);
+            samples = length(LFPcol);
+            LFPstore(iLFP,end+1:end+samples) = LFPcol;
         end
     end
     
     % Save averages on last trial of each test section
     if (p.last_section_trial == 1) 
-        meanWeightAB = p.sumWeights_A_to_B ./ p.psp_factor ./ p.sequence_counter;
+        meanWeightAB = p.sumWeights_A_to_B ./ p.PSP_factor ./ p.sequence_counter;
         if (p.train_on == 0)
             if strcmp(section_label, 'Testing before conditioning')
                 saveas(gcf, [foldername '\averages_pre_' num2str(p.itrial) '.fig']);
@@ -1079,13 +1079,13 @@ for itrial = 1:p.ntrials
             samples = 1:floor(2*p.fs); % Plot first 2 seconds
             h = [0 0 0]; % Fill with handles to graphics appearing in the Legend.
             colors = {'b', 'r', [0.7 0.7 0.5], 'c', 'm', 'y'};
-            lfpreserve = p.n_excit;
+            LFPreserve = p.n_excit;
             ncolunits = p.n_excit + p.n_inhib + p.n_out;
-            yreserve = lfpreserve + ncolunits + 20; % space to reserver for each column
+            yreserve = LFPreserve + ncolunits + 20; % space to reserver for each column
             ystart = 0;
             yticks = [];
-            for ilfp = 1:p.n_cols
-                colunits = (((ilfp - 1) * ncolunits) + 1) : (ilfp * ncolunits);
+            for iLFP = 1:p.n_cols
+                colunits = (((iLFP - 1) * ncolunits) + 1) : (iLFP * ncolunits);
                 sindex = find((tSpike < samples(end)) & ismember(iUnit, colunits));
                 iu = iUnit(sindex);
                 miniu = min(iu);
@@ -1093,13 +1093,13 @@ for itrial = 1:p.ntrials
                 iu(iui) = iu(iui) + 20;
                 iui = find(iu > miniu + p.n_excit);
                 iu(iui) = iu(iui) + 10;
-                iu = iu - colunits(1) + ystart + lfpreserve + 10;
+                iu = iu - colunits(1) + ystart + LFPreserve + 10;
                 plot(tSpike(sindex) ./ p.fs, iu, 'k.');
                 hold on;
-                lfpcol = lfp(ilfp,samples) + lfp(ilfp+3,samples);
-                lfpcol = lfpcol - min(lfpcol);
-                lfpcol = (p.n_excit * lfpcol / max(lfpcol)) + ystart;
-                h(ilfp) = plot((0:length(lfpcol)-1) ./ p.fs, lfpcol, 'Color', colors{ilfp}, 'LineWidth', 2);
+                LFPcol = LFP(iLFP,samples) + LFP(iLFP+3,samples);
+                LFPcol = LFPcol - min(LFPcol);
+                LFPcol = (p.n_excit * LFPcol / max(LFPcol)) + ystart;
+                h(iLFP) = plot((0:length(LFPcol)-1) ./ p.fs, LFPcol, 'Color', colors{iLFP}, 'LineWidth', 2);
                 yticks(end+1) = ystart + floor(p.n_excit/2);
                 yticks(end+1) = ystart + floor(p.n_excit + p.n_excit/2 + 10);
                 yticks(end+1) = ystart + floor(2*p.n_excit + p.n_inhib/2 + 20);
@@ -1120,12 +1120,12 @@ for itrial = 1:p.ntrials
             subplot(2,1,2); %Spectral Density of LFP
             freq = 0:1:199;
             periodogram_type = 'Power'; % 'Power' or 'PSD'
-            for ilfp = 1:p.n_cols
-                %[P, F] = periodogram(lfpstore(ilfp, :) - mean(lfpstore(ilfp, :)), [], freq, p.fs, periodogram_type);
-                [P,F] = pwelch(lfpstore(ilfp, :) - mean(lfpstore(ilfp, :)),[],[],freq,p.fs); % Usign pwelch over periodogram
-                plot(freq, P, 'Color', colors{ilfp}, 'LineWidth', 2);
+            for iLFP = 1:p.n_cols
+                %[P, F] = periodogram(LFPstore(iLFP, :) - mean(LFPstore(iLFP, :)), [], freq, p.fs, periodogram_type);
+                [P,F] = pwelch(LFPstore(iLFP, :) - mean(LFPstore(iLFP, :)),[],[],freq,p.fs); % Usign pwelch over periodogram
+                plot(freq, P, 'Color', colors{iLFP}, 'LineWidth', 2);
                 %P = sum(reshape(P, 4, 50));
-                %plot((0:49)*4 + 2, P, 'Color', colors{ilfp}, 'LineWidth', 2);
+                %plot((0:49)*4 + 2, P, 'Color', colors{iLFP}, 'LineWidth', 2);
                 hold on;
             end
             set(gca, 'fontsize', 16);
@@ -1141,7 +1141,7 @@ for itrial = 1:p.ntrials
         % Save PSTH figure for all T -> Column Groups
         psthfig = figure;
         set(psthfig, 'Position', [100 100 900 1000]);
-        lfpnames = {'LFP A', 'LFP A', 'LFP B', 'LFP B', 'LFP C', 'LFP C', 'LFP AOut', 'LFP BOut', 'LFP COut'};
+        LFPnames = {'LFP A', 'LFP A', 'LFP B', 'LFP B', 'LFP C', 'LFP C', 'LFP AOut', 'LFP BOut', 'LFP COut'};
         for iplot = 1:9
             % Plot PSTH
             subplot(5,2,iplot);
@@ -1154,7 +1154,7 @@ for itrial = 1:p.ntrials
             xlim([-50 50]);
             xticks(-50:10:50);
             xticklabels({'-50', '', '', '', '', '0' , '', '', '', '', '50'});
-            xlabel([psthdefs{iplot + 24} ', ' lfpnames{iplot}]);
+            xlabel([psthdefs{iplot + 24} ', ' LFPnames{iplot}]);
             if iplot == 1
                 title(['PSTH ' char(titlestr)]);
             end
@@ -1188,16 +1188,16 @@ save([foldername '\output_spikes.mat'], 'iUnit', 'tSpike'); % Save last 10 secon
 clockticks = p.stim_output_clockticks;  
 save([foldername '\stim_output_clockticks.mat'], 'clockticks'); % Save timestep course of all stimulation
 %save([foldername '\activity.mat'], 'activity'); % save activity of all units if desired (this is a large file)
-%save([foldername '\lfp.mat'], 'lfp');
+%save([foldername '\LFP.mat'], 'LFP');
 
-% Save spike triggered averages of lfp to text files  This includes the
-% single unit Ae1->lfpB through Ae40->lfpB
-fid = fopen([foldername '\Ae1-40_lfpB_postcond_STA.txt'], 'w');
+% Save spike triggered averages of LFP to text files  This includes the
+% single unit Ae1->LFPB through Ae40->LFPB
+fid = fopen([foldername '\Ae1-40_LFPB_postcond_STA.txt'], 'w');
 if fid > -1
     fprintf(fid, 'ms');
     for iplot = 1:40  % Header label for each spread sheet column.
         name = p.unit_names{iplot};
-        label = ['STA ' name ' lfp' lfpnames{2} ' (' num2str(sta_sweeps(iplot+70)) ')'];
+        label = ['STA ' name ' LFP' LFPnames{2} ' (' num2str(sta_sweeps(iplot+70)) ')'];
         fprintf(fid, '\t%s', label);
     end
     for iline = 1:length(scalex)
@@ -1209,12 +1209,12 @@ if fid > -1
     end
     fclose(fid);
 end
-fid = fopen([foldername '\Ae1-40_lfpB_precond_STA.txt'], 'w');
+fid = fopen([foldername '\Ae1-40_LFPB_precond_STA.txt'], 'w');
 if fid > -1
     fprintf(fid, 'ms');
     for iplot = 1:40  % Header label for each spread sheet column.
         name = p.unit_names{iplot};
-        label = ['STA ' name ' lfp' lfpnames{2} ' (' num2str(statest_sweeps(iplot+70)) ')'];
+        label = ['STA ' name ' LFP' LFPnames{2} ' (' num2str(statest_sweeps(iplot+70)) ')'];
         fprintf(fid, '\t%s', label);
     end
     for iline = 1:length(scalex)
@@ -1253,7 +1253,7 @@ end
 drawnow
 saveas(gcf, [foldername '\PSTH.fig']);
 
-%Plot average lfp around stimulation times.
+%Plot average LFP around stimulation times.
 %Evoked potentials are maximum value (in response range) - base value
 % (just before any possible response).  Within column EPs are probably
 % meaningless given that stimulus evoked IPSPs cancel with EPSPs in the LFP
@@ -1261,22 +1261,22 @@ letter = 'ABC';
 epfig = figure;
 set(epfig, 'Position', [100 100 1000 1000]);
 iplot = 1;
-avelfp = avelfp(:,:) / (1000 * avelfp_sweeps); % Convert to mV.
-avetestlfp = avetestlfp(:,:) / (1000 * avetestlfp_sweeps); % Convert to mV.
+aveLFP = aveLFP(:,:) / (1000 * aveLFP_sweeps); % Convert to mV.
+avetestLFP = avetestLFP(:,:) / (1000 * avetestLFP_sweeps); % Convert to mV.
 r1 = prebins + 1; % Stimulation bin
 r2 = r1 + floor(0.025 * p.fs); % end of peak measurment range
-lfpscale = (-r1:nbins-r1-1) / p.msfs;
+LFPscale = (-r1:nbins-r1-1) / p.msfs;
 clipvals = zeros(1,7); % Will put relevant MPI values on clipboard for easy paste into Excel
 clipind = [7 3 5 1 7 6 2 4 7]; % Indexes where MPI values should go, We don't save same-column values (on the diagonal).
 for icol = 1:3
     for itime = 1:3
         subplot(3, 3, iplot)
-        plot(lfpscale, [avetestlfp(iplot, :)', avelfp(iplot, :)'], 'linewidth', 3);
+        plot(LFPscale, [avetestLFP(iplot, :)', aveLFP(iplot, :)'], 'linewidth', 3);
         hold on;
-%        plot(lfpscale), avelfp(iplot+20, :), 'Color', [0 0 0]); % Excitatory LFP in Black
-%        plot(lfpscale, avelfp(iplot+30, :), 'Color', [1 0 0]); % Inhibitory LFP in Red
-        epval = max(avelfp(iplot, r1 + p.conduction_delay:r2)) - avelfp(iplot, r1 + p.conduction_delay);
-        eptest = max(avetestlfp(iplot, r1 + p.conduction_delay:r2)) - avetestlfp(iplot, r1 + p.conduction_delay);
+%        plot(LFPscale), aveLFP(iplot+20, :), 'Color', [0 0 0]); % Excitatory LFP in Black
+%        plot(LFPscale, aveLFP(iplot+30, :), 'Color', [1 0 0]); % Inhibitory LFP in Red
+        epval = max(aveLFP(iplot, r1 + p.conduction_delay:r2)) - aveLFP(iplot, r1 + p.conduction_delay);
+        eptest = max(avetestLFP(iplot, r1 + p.conduction_delay:r2)) - avetestLFP(iplot, r1 + p.conduction_delay);
         xlim([-25 25]);
         label = ['Stim Col ' letter(itime) ' -> LFP ' letter(icol)];
         xlabel(label);
@@ -1288,11 +1288,11 @@ for icol = 1:3
         label = ['Stim Col ' letter(itime) ' LFP ' letter(icol)];
         fid = fopen([foldername '\' label '.txt'], 'w');
         if (fid > -1)
-            fprintf(fid, ['ms\t' label ' (n=' num2str(avelfp_sweeps) ')\tExcite\tInhib\t']);
-            fprintf(fid, ['before cond (n=' num2str(avetestlfp_sweeps) ')\tExcite\tInhib\n']);
-            for iline = 1:length(lfpscale)
-                fprintf(fid, '%g\t%g\t%g\t%g\t', lfpscale(iline), avelfp(iplot, iline), avelfp(iplot+20, iline), avelfp(iplot+30, iline));
-                fprintf(fid, '%g\t%g\t%g\n', avetestlfp(iplot, iline), avetestlfp(iplot+20, iline), avetestlfp(iplot+30, iline));
+            fprintf(fid, ['ms\t' label ' (n=' num2str(aveLFP_sweeps) ')\tExcite\tInhib\t']);
+            fprintf(fid, ['before cond (n=' num2str(avetestLFP_sweeps) ')\tExcite\tInhib\n']);
+            for iline = 1:length(LFPscale)
+                fprintf(fid, '%g\t%g\t%g\t%g\t', LFPscale(iline), aveLFP(iplot, iline), aveLFP(iplot+20, iline), aveLFP(iplot+30, iline));
+                fprintf(fid, '%g\t%g\t%g\n', avetestLFP(iplot, iline), avetestLFP(iplot+20, iline), avetestLFP(iplot+30, iline));
             end
             fclose(fid);
         end
@@ -1304,9 +1304,9 @@ clipvals(7) = p.train_info(3); % Number of stimulations delivered
 clipboard('copy', sprintf('%.4g\t', clipvals)); % Copy MPI values to the clipboard.  This is something I paste into Excel often.
 
 drawnow;
-saveas(gcf, [foldername '\lfp_stim_response.fig']);
+saveas(gcf, [foldername '\LFP_stim_response.fig']);
 
-%Plot average lfp around column trigger times.
+%Plot average LFP around column trigger times.
 %These averages show central correlation peaks which affect the trigger
 %evoked potential calculations. These EPs are displayed for information
 %but probably should not be used in comparisons.
@@ -1317,34 +1317,34 @@ plotsequence = [1 4 7 2 5 8 3 6 9];
 r1 = prebins - floor(0.025 * p.fs) + 1; % 25 ms before trigger time
 for iplot = 1:9
     iu = source(iplot);
-    ilfp = dest(iplot);
+    iLFP = dest(iplot);
     uname = p.unit_names{iu};
     subplot(3, 3, plotsequence(iplot));
-    testlfp = 0.001 * statest(iplot + 60, :) ./ statest_sweeps(iplot + 60);
-    postlfp = 0.001 * sta(iplot + 60, :) / sta_sweeps(iplot + 60);
-    plot(stascale, [testlfp', postlfp'], 'linewidth', 3);
+    testLFP = 0.001 * statest(iplot + 60, :) ./ statest_sweeps(iplot + 60);
+    postLFP = 0.001 * sta(iplot + 60, :) / sta_sweeps(iplot + 60);
+    plot(stascale, [testLFP', postLFP'], 'linewidth', 3);
     hold on;
     % Base measurments are made 25 ms before the trigger to account for the
     % central correlation peak.
-    epval = max(postlfp(r1+p.conduction_delay:end)) - postlfp(r1+p.conduction_delay);
-    eptest = max(testlfp(r1+p.conduction_delay:end)) - testlfp(r1+p.conduction_delay);
+    epval = max(postLFP(r1+p.conduction_delay:end)) - postLFP(r1+p.conduction_delay);
+    eptest = max(testLFP(r1+p.conduction_delay:end)) - testLFP(r1+p.conduction_delay);
     xlim([scalems(1) 50]);
-    label = ['STA ' uname(1) 'e -> LFP ' letter(ilfp)];
+    label = ['STA ' uname(1) 'e -> LFP ' letter(iLFP)];
     xlabel(label);
     title(['LFP EP ' num2str(epval) ', MPI ' num2str((epval - eptest) * 100 / eptest, 4)]);
 
-    label = ['STA ' uname(1) 'e to LFP' letter(ilfp)];
+    label = ['STA ' uname(1) 'e to LFP' letter(iLFP)];
     fid = fopen([foldername '\' label '.txt'], 'w');
     if (fid > -1)
         fprintf(fid, ['ms\t' label ' (n=' num2str(sta_sweeps(iplot + 60)) ')\tbefore cond (n=' num2str(statest_sweeps(iplot + 60)) ')\n']);
         for iline = 1:length(stascale)
-            fprintf(fid, '%g\t%g\t%g\n', stascale(iline), postlfp(iline), testlfp(iline));
+            fprintf(fid, '%g\t%g\t%g\n', stascale(iline), postLFP(iline), testLFP(iline));
         end
         fclose(fid);
     end
 end
 drawnow;
-saveas(gcf, [foldername '\lfp_spike_response.fig']);
+saveas(gcf, [foldername '\LFP_spike_response.fig']);
 close(gcf);
 
 %Plot average synthetic EMG around stimulation times.
@@ -1354,7 +1354,7 @@ iplot = 1;
 for icol = 1:3
     for itime = 1:3
         subplot(3, 3, iplot)
-        plot(lfpscale, [avetestlfp(iplot+10, :)', avelfp(iplot+10, :)'], 'linewidth', 3);
+        plot(LFPscale, [avetestLFP(iplot+10, :)', aveLFP(iplot+10, :)'], 'linewidth', 3);
         hold on;
         xlim([-10 scalems(2)]);
         label = ['Stim Col ' letter(itime) ' -> EMG ' letter(icol)];
@@ -1362,10 +1362,10 @@ for icol = 1:3
         label = ['Stim Col ' letter(itime) ' to EMG ' letter(icol)];
         fid = fopen([foldername '\' label '.txt'], 'w');
         if (fid > -1)
-            fprintf(fid, ['ms\t' label ' (n=' num2str(avelfp_sweeps) ')\t']);
-            fprintf(fid, ['before cond (n=' num2str(avetestlfp_sweeps) ')\n']);
-            for iline = 1:length(lfpscale)
-                fprintf(fid, '%g\t%g\t%g\n', lfpscale(iline), avelfp(iplot, iline), avetestlfp(iplot, iline));
+            fprintf(fid, ['ms\t' label ' (n=' num2str(aveLFP_sweeps) ')\t']);
+            fprintf(fid, ['before cond (n=' num2str(avetestLFP_sweeps) ')\n']);
+            for iline = 1:length(LFPscale)
+                fprintf(fid, '%g\t%g\t%g\n', LFPscale(iline), aveLFP(iplot, iline), avetestLFP(iplot, iline));
             end
             fclose(fid);
         end
@@ -1373,7 +1373,7 @@ for icol = 1:3
     end
 end
 drawnow;
-saveas(gcf, [foldername '\emg_spike_response.fig']);
+saveas(gcf, [foldername '\EMG_spike_response.fig']);
 close(gcf);
 
 % Pre and Post Conditioning Evoked Potentials.  This is more interesting
@@ -1435,7 +1435,7 @@ for iw = 1:p.weights
     wvals(p.weight_pre_unit(iw), p.weight_post_unit(iw)) = p.weight_strength(iw);
 end
 wvals(wvals == 0) = NaN;
-pcolor(wvals/ p.psp_factor);
+pcolor(wvals/ p.PSP_factor);
 title(titlestr);
 caxis([-500 500]);
 colormap jet;
@@ -1460,7 +1460,7 @@ for from_col = 3:-1:1
         preunits = find(strncmp(p.unit_names, colexcit{from_col}, 2)); % From source column excitatory units
         postunits = find(strncmp(p.unit_names, colexcit{to_col}, 2));  % To dest column excitatory and inhibitory units
         postunits = [postunits find(strncmp(p.unit_names, colinhib{to_col}, 2))];
-        values = p.weight_strength(ismember(p.weight_pre_unit, preunits) & ismember(p.weight_post_unit, postunits)) / p.psp_factor;
+        values = p.weight_strength(ismember(p.weight_pre_unit, preunits) & ismember(p.weight_post_unit, postunits)) / p.PSP_factor;
         q2 = mean(values);
         q1 = mean(values(values < q2));
         q3 = mean(values(values > q2));
@@ -1496,18 +1496,18 @@ end
         p.units = 0;
         p.weights = 0;
         p.biases = 1;
-        % Caclulate psp_factor for converting uV into weights for our
+        % Caclulate PSP_factor for converting uV into weights for our
         % slow and fast exponential decay functions. This is based on the
         % peak value in the PSP curve calculated with the 0.1 ms timestep.
         % This keeps the areas under PSP curves with smaller timesteps more
         % comparable.
         slow_decay = 1 - 0.1 / p.PSP_slow_time_constant_ms; 
         fast_decay = 1 - 0.1 / p.PSP_fast_time_constant_ms;   
-        timestep_index = (0:1000); % Assuming psp maximal value is within 100ms of start. 
+        timestep_index = (0:1000); % Assuming PSP maximal value is within 100ms of start. 
         yslow = slow_decay .^ timestep_index;
         yfast = fast_decay .^ timestep_index;
-        p.psp_factor = 1 / max(yslow - yfast);  % Multiplier for psp amplitudes to account for exponential decay function.
-        p.max_psp_value = p.max_strength * p.psp_factor;
+        p.PSP_factor = 1 / max(yslow - yfast);  % Multiplier for PSP amplitudes to account for exponential decay function.
+        p.max_PSP_value = p.max_strength * p.PSP_factor;
     end
 
     function Init_Done()
@@ -1550,23 +1550,23 @@ end
         disp(['Final units: ' num2str(p.units) ', weights: ' num2str(p.weights)]);
     end
 
-    function psp_value = uv2psp(uV_value)
-        % Convert psp microvolt value to our exponential offset value.
+    function PSP_value = uv2PSP(uV_value)
+        % Convert PSP microvolt value to our exponential offset value.
         % Randomize if uV_Value contains 2 values.
         if length(uV_value) == 1
-            psp_value = round(p.psp_factor * uV_value);
+            PSP_value = round(p.PSP_factor * uV_value);
         else
-            psp_value = round(p.psp_factor * random('Uniform', uV_value(1), uV_value(2)));
+            PSP_value = round(p.PSP_factor * random('Uniform', uV_value(1), uV_value(2)));
         end
     end
 
     function Init_Bias(bias_index, value, rate)
-        p.bias_strength(bias_index) = uv2psp(value);
+        p.bias_strength(bias_index) = uv2PSP(value);
         p.bias_chance(bias_index, 1:p.time_steps) = uint32(floor((2^32 - 1) * (rate / p.fs)));
         p.biases = max(bias_index, p.biases);
     end
 
-    function Init_Unit(prefix, count, thresh, col_index, bias_index, lfp_index) % ('Ae', p.An, threshold, column, bias_id, lfp_id);
+    function Init_Unit(prefix, count, thresh, col_index, bias_index, LFP_index) % ('Ae', p.An, threshold, column, bias_id, LFP_id);
        for iux = 1:count
             p.units = p.units + 1;
             p.unit_names{p.units} = [prefix num2str(iux)];  % Text name of unit
@@ -1580,7 +1580,7 @@ end
             end
             p.unit_column_id(p.units) = col_index;     % Column index, 0 = Column A, 1 = Column B, 2 = Column C
             p.unit_bias_offset(p.units) = bias_index - 1; % Zero based bias id   
-            p.unit_lfp_offset(p.units) = lfp_index - 1;   % zero based lfp id
+            p.unit_LFP_offset(p.units) = LFP_index - 1;   % zero based LFP id
             p.unit_stim_source(p.units) = 0;
             p.unit_stim_target(p.units) = 0;
         end
@@ -1596,21 +1596,21 @@ end
         flagsout = flags;
     end
 
-    function Init_Weight(pre_name, pre_index, post_name, post_index, initial_psp)
+    function Init_Weight(pre_name, pre_index, post_name, post_index, initial_PSP)
         pre_units = find(strncmp(p.unit_names, pre_name, length(pre_name)));
         post_units = find(strncmp(p.unit_names, post_name, length(post_name)));
         npre = length(pre_index);
         npost = length(post_index);
-        psp_prob = abs(initial_psp(3));
-        psp_value = p.psp_factor * random('Uniform', initial_psp(1), initial_psp(2), npre, npost);
-        psp_train = initial_psp(4);
-        if initial_psp(3) >= 0
+        PSP_prob = abs(initial_PSP(3));
+        PSP_value = p.PSP_factor * random('Uniform', initial_PSP(1), initial_PSP(2), npre, npost);
+        PSP_train = initial_PSP(4);
+        if initial_PSP(3) >= 0
             % Random chance for each connection
-            psp_chance = (random('Uniform', 0, 1, npre, npost) <= psp_prob);  % Chance for each connection to exist.
+            PSP_chance = (random('Uniform', 0, 1, npre, npost) <= PSP_prob);  % Chance for each connection to exist.
         else
             % Connection from first fraction of the Pre units.
-            psp_chance = zeros(npre, npost);
-            psp_chance(1:ceil(psp_prob * npre), :) = 1;
+            PSP_chance = zeros(npre, npost);
+            PSP_chance(1:ceil(PSP_prob * npre), :) = 1;
         end
         
         if p.test_No_ColA_ColB_connections
@@ -1630,7 +1630,7 @@ end
             for g2 = 1:npost
                 id1 = pre_index(g1);
                 id2 = post_index(g2);
-                if ((id1 ~= id2) || ~strcmp(pre_name, post_name)) && psp_chance(g1,g2) % Disallow connections with the same group ID (no self connections and allow for an unconnected testing pair between groups)
+                if ((id1 ~= id2) || ~strcmp(pre_name, post_name)) && PSP_chance(g1,g2) % Disallow connections with the same group ID (no self connections and allow for an unconnected testing pair between groups)
                     p.weights = p.weights + 1;
                     pre = pre_units(id1);    % Index of presynaptic unit
                     post = post_units(id2);  % Index of postsynaptic unit
@@ -1638,8 +1638,8 @@ end
                     p.unit_pre_count(pre) = p.unit_pre_count(pre) + 1;
                     p.weight_post_unit(p.weights) = post;
                     p.unit_post_count(post) = p.unit_post_count(post) + 1;
-                    p.weight_strength(p.weights) = psp_value(g1,g2);   % Current connection strength
-                    p.weight_training_rule(p.weights) = psp_train;     % Learning rule type (0 = none);
+                    p.weight_strength(p.weights) = PSP_value(g1,g2);   % Current connection strength
+                    p.weight_training_rule(p.weights) = PSP_train;     % Learning rule type (0 = none);
                     % Check for special testing conditions.
                     if p.test_A1_lesion
                         % Testing is done with weights from A1 set to zero.
@@ -1664,15 +1664,15 @@ end
         end
     end
  
-    function psp = calcpsp(weight, delay, bins, zerobin)
+    function PSP = calcPSP(weight, delay, bins, zerobin)
         % Floating point version of target PSP shape
-        psp = zeros(bins, 1);
-        s = uv2psp(weight);
+        PSP = zeros(bins, 1);
+        s = uv2PSP(weight);
         f = s;
         for i=floor(zerobin + delay):bins
-            psp(i) = s - f;
-            s = s * p.psp_slow_decay;
-            f = f * p.psp_fast_decay;
+            PSP(i) = s - f;
+            s = s * p.PSP_slow_decay;
+            f = f * p.PSP_fast_decay;
         end
     end
 
@@ -1756,9 +1756,9 @@ end
             end
         end
         wvals(wvals == 0) = NaN;
-        wvals(1, end) = p.max_strength *  p.psp_factor;
-        wvals(end, 1) = -p.max_strength *  p.psp_factor;
-        h = pcolor(wvals/ p.psp_factor);
+        wvals(1, end) = p.max_strength *  p.PSP_factor;
+        wvals(end, 1) = -p.max_strength *  p.PSP_factor;
+        h = pcolor(wvals/ p.PSP_factor);
         
         for itick = 41:40:241
             line([1 241], [itick itick], 'Color', 'k');
