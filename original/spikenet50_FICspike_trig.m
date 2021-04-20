@@ -1,4 +1,4 @@
-function spikenet50_FICspike_trig()
+function spikenet50_FICspike_trig(folder)
 % Runs an integerate and fire neural network model.
 % Displays correlograms and spike triggered averages for selected units.
 %
@@ -46,7 +46,11 @@ close all;     % Can be used to close all currently open figures.
 cd(p.scriptpath); % Run inside of this scripts directory.
 
 % Output is saved to a folder named [p.folder '\' p.subfolder '\' p.prefix '_' datestring '_' indexstring]
-p.folder = 'd:\data\spikenet'; % Data directory prefix
+if nargin < 1
+   p.folder = 'd:\data\spikenet'; % Data directory prefix
+else
+   p.folder = folder;
+end
 p.subfolder = 'spikenet50';       % Folder name to hold ouput folders.
 p.prefix = 'sn';               % Output folder name prefix.
 p.mexname = 'spikenet50mex';   % Name of the mex routine that runs the network.
