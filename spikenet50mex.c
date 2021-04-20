@@ -358,7 +358,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	/* Require 1 input parameter and 2 output parameters */
 
 	if ((nlhs != 2) ||(nrhs != 3)) {
-		mexErrMsgTxt("Usage: [uindex, tstamp] = spikenet1mex(p, act)"); 
+		mexErrMsgTxt("Usage: [uindex, tstamp] = spikenet1mex(p, act, lfp)"); 
 		return;
 	}
     

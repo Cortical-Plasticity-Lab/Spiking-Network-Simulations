@@ -1,16 +1,15 @@
-function spikenet50_paired_pulse()
+function spikenet50_spike_trig(folder)
 % Runs an integerate and fire neural network model.
 % Displays correlograms and spike triggered averages for selected units.
 %
-% This version has been setup for paired pulse conditioning. This is a
+% This version has been setup for spike triggered conditioning. This is a
 % modification of spikenet50.m with:
-%   p.conditioning_type = 2;
-%   p.conditioning_secs = 7; % 1..10 to change number of paired pulses in each 10 second time block.
+%   p.conditioning_type = 1;
 % Stimulation parameters:
-%   p.stim_delay_ms = 10;    % Millisecond delay between the paired pulses
-%   p.stim_pulse_train = 1;  % Can be 2 or 3 for paired pulse trains of 2 or 3 pulses per train.
+%   p.stim_delay_ms = 10;    % Millisecond delay between spike on Ae1 and stimulus on Column B.
+%   p.stim_pulse_train = 1;  % Can be 2 or 3 for stimulus trains of 2 or 3 pulses per train.
 %   p.stim_uV = 2000;        % Size of conditioning stimulus (0 can be used as a sham stimulus)
-%   p.pair_uV = 2000;        % Size of the paired pulse simulation (the second pulse)
+%   p.stim_refractory_ms = 10;  % Refractory period on delivered stimulation.
 %
 %-----------------------------
 %
@@ -37,13 +36,17 @@ close all;     % Can be used to close all currently open figures.
 cd(p.scriptpath); % Run inside of this scripts directory.
 
 % Output is saved to a folder named [p.folder '\' p.subfolder '\' p.prefix '_' datestring '_' indexstring]
-p.folder = 'd:\data\spikenet'; % Data directory prefix
+if nargin < 1
+   p.folder = 'd:\data\spikenet'; % Data directory prefix
+else
+   p.folder = folder;
+end
 p.subfolder = 'spikenet50';       % Folder name to hold ouput folders.
 p.prefix = 'sn';               % Output folder name prefix.
 p.mexname = 'spikenet50mex';   % Name of the mex routine that runs the network.
 
 % Simulation parameters.  Note that not all parameters affect all conditioning types.
-p.conditioning_type = 2;       % 0=No conditioning, 1=spike triggered, 2=paired pulse, 3 = cycle triggered on LFPB, 4 = Tetanic stim on Col A, 5 = Tetanic stim on Col B, 6 = Tetatic stim on Col C, 7 = EMG triggered Stimulation, 8 = Gamma triggered stimulation, 9 = Activity triggered stimulation
+p.conditioning_type = 1;       % 0=No conditioning, 1=spike triggered, 2=paired pulse, 3 = cycle triggered on LFPB, 4 = Tetanic stim on Col A, 5 = Tetanic stim on Col B, 6 = Tetatic stim on Col C, 7 = EMG triggered Stimulation, 8 = Gamma triggered stimulation, 9 = Activity triggered stimulation
 p.stim_delay_ms = 10;          % Stimulaton delay from rec_unit threshold crossing to start of stimulation PSP in designated stim target units.
 p.stim_pulse_train = 1;        % Pulses in the 300 Hz stim pulse train for conditioning. Limited to 3 for Paired Pulse stimulation.
 p.stim_pulse_freq = 300;       % Interstimulus interval for stimlus trains (this will be converted to an integer number of timesteps)
@@ -52,7 +55,7 @@ p.stim_refractory_ms = 10;     % Refractory period on spike triggered and LFP cy
 p.lfp_detect_level = 30000;    % Amplitude of LFP used for cycle triggered conditioning (use 30000 for cycle triggered +/-20%, -20000 or so for gamma triggered depending on %correlated bias drive, 1000 for EMG triggered
 p.gamma_band = [50 80];        % Bandwidth for conditioning_type in Hz (for example [50 80] for 50Hz to 80Hz bandpass filter.
 p.emg_band = [100 2500];       % Column A motor output filter (Hz) for EMG triggered stimulation.
-p.conditioning_secs = 7;       % Seconds in each trial used for conditioning.  Limits conditioning to beginning of each 10 second trial.
+p.conditioning_secs = 10;      % Seconds in each trial used for conditioning.  Limits conditioning to beginning of each 10 second trial.
 p.bias_modulation_rate_A = 0;  % Cycles per second modulation rate on Column A. 0 = no modulation. 19, 20, or 21 for sine wave
 p.bias_modulation_rate_B = 0;  % Cycles per second modulation rate on Column B. 0 = no modulation. 20 for 20Hz sine wave
 p.beta_band = [15 25];         % LFP_B filter band (Hz) for cycle triggered stimulation.
@@ -152,7 +155,7 @@ p.epsp2inhib_incol = [p.initmin p.initmax 1/6 1];     % Epsp for connections to 
 p.epsp2excit_outcol = [p.initmin p.initmax 1/6 1];    % Epsp for connections to excitatory units in adjacent columns
 p.epsp2inhib_outcol = [p.initmin p.initmax 1/6 1];    % Epsp for connections to inhibitory units in adjacent columns
 p.ipsp2excit_incol = [-p.initmax -p.initmin 1/3 1];   % Ipsp for connections to excitatory units within a column
-p.ipsp2inhib_incol = [-p.initmax -p.initmin 1/3 1];   % Ipsp for connections to inhibitory units within a column
+p.ipsp2inhib_incol = [-p.initmax -p.initmin 0 1];   % Ipsp for connections to inhibitory units within a column
 p.epsp2output_incol = [350 350 1/3 0];    % Epsp for connections to output units.  These are not usually trained. Negative connection chance means first p * N units rather than random chance.
 
 p.training_rate = 100;    % Train rate factor for both strengthing (pos) and weakening (neg) sides of the SDTP rule.

@@ -27,7 +27,7 @@ close all;     % Can be used to close all currently open figures.
 cd(p.scriptpath); % Run inside of this scripts directory.
 
 % Output is saved to a folder named [p.folder '\' p.subfolder '\' p.prefix '_' datestring '_' indexstring]
-p.folder = 'c:\data\spikenet'; % Data directory prefix
+p.folder = 'd:\data\spikenet'; % Data directory prefix
 p.subfolder = 'spikenet50';       % Folder name to hold ouput folders.
 p.prefix = 'sn';               % Output folder name prefix.
 p.mexname = 'spikenet50mex';   % Name of the mex routine that runs the network.
@@ -262,8 +262,8 @@ p.train_info = zeros(1,4);% Place for keeping track of some training summary res
 % Bias 1 is for uncorrelated biases. Biases 2,3,4 are for correlated biases
 % assigned to groups A,B,C.  Bias 5 is for output units.
 
-p.bias_strength = zeros(5, 1, 'double'); % 
-p.bias_chance = zeros(5, p.time_steps, 'uint32'); % probability(step) = chance(step)/(2^32 - 1)
+p.bias_strength = zeros(8, 1, 'double'); % 
+p.bias_chance = zeros(8, p.time_steps, 'uint32'); % probability(step) = chance(step)/(2^32 - 1)
 
 % Pre-allocate space for units
 
@@ -344,7 +344,7 @@ end
 
 % Initialization
 
-Init_Network();
+init_network_();
 
 %%%%
 % Fill in bias information
@@ -452,64 +452,64 @@ end
 
 %%%%
 
-Init_Bias(1, p.bias_value, correlated_rate1); % Correlated bias probability for a column is always first.
-Init_Bias(2, p.bias_value, uncorrelated_rate1); % Uncorrelated bias probability for column must come immediately after.
-Init_Bias(3, p.bias_value, correlated_rate2);
-Init_Bias(4, p.bias_value, uncorrelated_rate2);
-Init_Bias(5, p.bias_value, correlated_rate3);
-Init_Bias(6, p.bias_value, uncorrelated_rate3);
-Init_Bias(7, p.bias_value, 0); % No correlated biases for outputs
-Init_Bias(8, p.bias_value, out_rate);
+config_bias(1, p.bias_value, correlated_rate1); % Correlated bias probability for a column is always first.
+config_bias(2, p.bias_value, uncorrelated_rate1); % Uncorrelated bias probability for column must come immediately after.
+config_bias(3, p.bias_value, correlated_rate2);
+config_bias(4, p.bias_value, uncorrelated_rate2);
+config_bias(5, p.bias_value, correlated_rate3);
+config_bias(6, p.bias_value, uncorrelated_rate3);
+config_bias(7, p.bias_value, 0); % No correlated biases for outputs
+config_bias(8, p.bias_value, out_rate);
 
 % Fill in unit information
 
-Init_Unit('Ae', p.n_excit, p.threshold, 0, 1, 1);  % Column A, Bias index for Col A, LFP index 1
-Init_Unit('Ai', p.n_inhib, p.threshold, 0, 1, 1);
-Init_Unit('Ao', p.n_out, p.output_threshold_range, 0 + 16384, 7, 11); % Output units tagged wit +16384
+config_column_layer_activity('Ae', p.n_excit, p.threshold, 0, 1, 1);  % Column A, Bias index for Col A, LFP index 1
+config_column_layer_activity('Ai', p.n_inhib, p.threshold, 0, 1, 1);
+config_column_layer_activity('Ao', p.n_out, p.output_threshold_range, 0 + 16384, 7, 11); % Output units tagged wit +16384
 
-Init_Unit('Be', p.n_excit, p.threshold, 1, 3, 2);  % Column B, Bias index for Col B, LFP index 2
-Init_Unit('Bi', p.n_inhib, p.threshold, 1, 3, 2);
-Init_Unit('Bo', p.n_out, p.output_threshold_range, 1 + 16384, 7, 12);
+config_column_layer_activity('Be', p.n_excit, p.threshold, 1, 3, 2);  % Column B, Bias index for Col B, LFP index 2
+config_column_layer_activity('Bi', p.n_inhib, p.threshold, 1, 3, 2);
+config_column_layer_activity('Bo', p.n_out, p.output_threshold_range, 1 + 16384, 7, 12);
 
-Init_Unit('Ce', p.n_excit, p.threshold, 2, 5, 3);  % Column C, Bias index for Col C, LFP index 3
-Init_Unit('Ci', p.n_inhib, p.threshold, 2, 5, 3);
-Init_Unit('Co', p.n_out, p.output_threshold_range, 2 + 16384, 7, 13);
+config_column_layer_activity('Ce', p.n_excit, p.threshold, 2, 5, 3);  % Column C, Bias index for Col C, LFP index 3
+config_column_layer_activity('Ci', p.n_inhib, p.threshold, 2, 5, 3);
+config_column_layer_activity('Co', p.n_out, p.output_threshold_range, 2 + 16384, 7, 13);
 
 % Fill in connection information
 
-Init_Weight('Ae', 1:p.n_excit, 'Ae', 1:p.n_excit, p.EPSP_2_excit_incol);
-Init_Weight('Ae', 1:p.n_excit, 'Ai', 1:p.n_inhib, p.EPSP_2_inhib_incol);
-Init_Weight('Ae', 1:p.n_excit, 'Be', 1:p.n_excit, p.EPSP_2_excit_outcol);
-Init_Weight('Ae', 1:p.n_excit, 'Bi', 1:p.n_inhib, p.EPSP_2_inhib_outcol);
-Init_Weight('Ae', 1:p.n_excit, 'Ce', 1:p.n_excit, p.EPSP_2_excit_outcol);
-Init_Weight('Ae', 1:p.n_excit, 'Ci', 1:p.n_inhib, p.EPSP_2_inhib_outcol);
-Init_Weight('Ai', 1:p.n_inhib, 'Ae', 1:p.n_excit, p.IPSP_2_excit_incol);
-Init_Weight('Ai', 1:p.n_inhib, 'Ai', 1:p.n_inhib, p.IPSP_2_inhib_incol);
-Init_Weight('Ae', 1:p.n_excit, 'Ao', 1:p.n_out, p.EPSP_2_output_incol);
+config_column_layer_connections('Ae', 1:p.n_excit, 'Ae', 1:p.n_excit, p.EPSP_2_excit_incol);
+config_column_layer_connections('Ae', 1:p.n_excit, 'Ai', 1:p.n_inhib, p.EPSP_2_inhib_incol);
+config_column_layer_connections('Ae', 1:p.n_excit, 'Be', 1:p.n_excit, p.EPSP_2_excit_outcol);
+config_column_layer_connections('Ae', 1:p.n_excit, 'Bi', 1:p.n_inhib, p.EPSP_2_inhib_outcol);
+config_column_layer_connections('Ae', 1:p.n_excit, 'Ce', 1:p.n_excit, p.EPSP_2_excit_outcol);
+config_column_layer_connections('Ae', 1:p.n_excit, 'Ci', 1:p.n_inhib, p.EPSP_2_inhib_outcol);
+config_column_layer_connections('Ai', 1:p.n_inhib, 'Ae', 1:p.n_excit, p.IPSP_2_excit_incol);
+config_column_layer_connections('Ai', 1:p.n_inhib, 'Ai', 1:p.n_inhib, p.IPSP_2_inhib_incol);
+config_column_layer_connections('Ae', 1:p.n_excit, 'Ao', 1:p.n_out, p.EPSP_2_output_incol);
 
-Init_Weight('Be', 1:p.n_excit, 'Be', 1:p.n_excit, p.EPSP_2_excit_incol);
-Init_Weight('Be', 1:p.n_excit, 'Bi', 1:p.n_inhib, p.EPSP_2_inhib_incol);
-Init_Weight('Be', 1:p.n_excit, 'Ae', 1:p.n_excit, p.EPSP_2_excit_outcol);
-Init_Weight('Be', 1:p.n_excit, 'Ai', 1:p.n_inhib, p.EPSP_2_inhib_outcol);
-Init_Weight('Be', 1:p.n_excit, 'Ce', 1:p.n_excit, p.EPSP_2_excit_outcol);
-Init_Weight('Be', 1:p.n_excit, 'Ci', 1:p.n_inhib, p.EPSP_2_inhib_outcol);
-Init_Weight('Bi', 1:p.n_inhib, 'Be', 1:p.n_excit, p.IPSP_2_excit_incol);
-Init_Weight('Bi', 1:p.n_inhib, 'Bi', 1:p.n_inhib, p.IPSP_2_inhib_incol);
-Init_Weight('Be', 1:p.n_excit, 'Bo', 1:p.n_out, p.EPSP_2_output_incol);
+config_column_layer_connections('Be', 1:p.n_excit, 'Be', 1:p.n_excit, p.EPSP_2_excit_incol);
+config_column_layer_connections('Be', 1:p.n_excit, 'Bi', 1:p.n_inhib, p.EPSP_2_inhib_incol);
+config_column_layer_connections('Be', 1:p.n_excit, 'Ae', 1:p.n_excit, p.EPSP_2_excit_outcol);
+config_column_layer_connections('Be', 1:p.n_excit, 'Ai', 1:p.n_inhib, p.EPSP_2_inhib_outcol);
+config_column_layer_connections('Be', 1:p.n_excit, 'Ce', 1:p.n_excit, p.EPSP_2_excit_outcol);
+config_column_layer_connections('Be', 1:p.n_excit, 'Ci', 1:p.n_inhib, p.EPSP_2_inhib_outcol);
+config_column_layer_connections('Bi', 1:p.n_inhib, 'Be', 1:p.n_excit, p.IPSP_2_excit_incol);
+config_column_layer_connections('Bi', 1:p.n_inhib, 'Bi', 1:p.n_inhib, p.IPSP_2_inhib_incol);
+config_column_layer_connections('Be', 1:p.n_excit, 'Bo', 1:p.n_out, p.EPSP_2_output_incol);
 
-Init_Weight('Ce', 1:p.n_excit, 'Ce', 1:p.n_excit, p.EPSP_2_excit_incol);
-Init_Weight('Ce', 1:p.n_excit, 'Ci', 1:p.n_inhib, p.EPSP_2_inhib_incol);
-Init_Weight('Ce', 1:p.n_excit, 'Be', 1:p.n_excit, p.EPSP_2_excit_outcol);
-Init_Weight('Ce', 1:p.n_excit, 'Bi', 1:p.n_inhib, p.EPSP_2_inhib_outcol);
-Init_Weight('Ce', 1:p.n_excit, 'Ae', 1:p.n_excit, p.EPSP_2_excit_outcol);
-Init_Weight('Ce', 1:p.n_excit, 'Ai', 1:p.n_inhib, p.EPSP_2_inhib_outcol);
-Init_Weight('Ci', 1:p.n_inhib, 'Ce', 1:p.n_excit, p.IPSP_2_excit_incol);
-Init_Weight('Ci', 1:p.n_inhib, 'Ci', 1:p.n_inhib, p.IPSP_2_inhib_incol);
-Init_Weight('Ce', 1:p.n_excit, 'Co', 1:p.n_out, p.EPSP_2_output_incol);
+config_column_layer_connections('Ce', 1:p.n_excit, 'Ce', 1:p.n_excit, p.EPSP_2_excit_incol);
+config_column_layer_connections('Ce', 1:p.n_excit, 'Ci', 1:p.n_inhib, p.EPSP_2_inhib_incol);
+config_column_layer_connections('Ce', 1:p.n_excit, 'Be', 1:p.n_excit, p.EPSP_2_excit_outcol);
+config_column_layer_connections('Ce', 1:p.n_excit, 'Bi', 1:p.n_inhib, p.EPSP_2_inhib_outcol);
+config_column_layer_connections('Ce', 1:p.n_excit, 'Ae', 1:p.n_excit, p.EPSP_2_excit_outcol);
+config_column_layer_connections('Ce', 1:p.n_excit, 'Ai', 1:p.n_inhib, p.EPSP_2_inhib_outcol);
+config_column_layer_connections('Ci', 1:p.n_inhib, 'Ce', 1:p.n_excit, p.IPSP_2_excit_incol);
+config_column_layer_connections('Ci', 1:p.n_inhib, 'Ci', 1:p.n_inhib, p.IPSP_2_inhib_incol);
+config_column_layer_connections('Ce', 1:p.n_excit, 'Co', 1:p.n_out, p.EPSP_2_output_incol);
 
 % Finish initialzation. Sort weights for speed, etc.
 
-Init_Done();
+finalize_configuration_();
 
 % Setup output directory
 
@@ -1444,7 +1444,7 @@ drawnow
 saveas(gcf, [foldername '\weight_matrix.fig']);
 close(gcf);
 % Display labeled figure that excludes output units.
-display_weight_figure(titlestr);
+f.weights_plot(titlestr);
 saveas(gcf, [foldername '\weight_matrix_labeled.fig']);
 
 % Display weight distributions for excitatory weights from and to units
@@ -1490,7 +1490,7 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    function Init_Network()
+    function init_network_()
         % Start network initialization
         %disp(['Estimated units: ' num2str(p.units) ', weights: ' num2str(p.weights)]);
         p.units = 0;
@@ -1509,64 +1509,14 @@ end
         p.PSP_factor = 1 / max(yslow - yfast);  % Multiplier for PSP amplitudes to account for exponential decay function.
         p.max_PSP_value = p.max_strength * p.PSP_factor;
     end
-
-    function Init_Done()
-        % Finish network initialization
-        % Resize weight arrays to maximum defined weights
-        p.weight_pre_unit = p.weight_pre_unit(1:p.weights);
-        p.weight_post_unit = p.weight_post_unit(1:p.weights);
-        p.weight_strength = p.weight_strength(1:p.weights);
-        p.weight_training_rule = p.weight_training_rule(1:p.weights);
-        
-        % extra arrays needed for acceleration and information.
-        p.weight_pre_sort = zeros(p.weights, 1, 'uint32');   % Offsets to weights sorted by pre_unit
-        p.weight_post_sort = zeros(p.weights, 1, 'uint32');  % Offsets to weights sorted by post_unit
-         
-        % Sort weights by pre and post units and figure offsets into sort lists.
-        [sorted, indices] = sort(p.weight_pre_unit);
-        p.weight_pre_sort = uint32(indices - 1);
-        for iux = 1:p.units
-            index = find(sorted == iux, 1);
-            if ~isempty(index)
-                p.unit_pre_offset(iux) = index - 1;
-            end
-        end
-
-        [sorted, indices] = sort(p.weight_post_unit);
-        p.weight_post_sort = uint32(indices - 1);
-        for iux = 1:p.units
-            index = find(sorted == iux, 1);
-            if ~isempty(index)
-                p.unit_post_offset(iux) = index - 1;
-            end
-        end
-
-        p.weight_strength2 = p.weight_strength; % weight strength at next time step.
-        
-        % Initialize unit flags for paired pulse and tetanic.
-        p.unit_stim_source = Set_Unit_Flags(p.unit_stim_source, p.stim_source_def);
-        p.unit_stim_target = Set_Unit_Flags(p.unit_stim_target, p.stim_target_def);
-        
-        disp(['Final units: ' num2str(p.units) ', weights: ' num2str(p.weights)]);
-    end
-
-    function PSP_value = uv2PSP(uV_value)
-        % Convert PSP microvolt value to our exponential offset value.
-        % Randomize if uV_Value contains 2 values.
-        if length(uV_value) == 1
-            PSP_value = round(p.PSP_factor * uV_value);
-        else
-            PSP_value = round(p.PSP_factor * random('Uniform', uV_value(1), uV_value(2)));
-        end
-    end
-
-    function Init_Bias(bias_index, value, rate)
-        p.bias_strength(bias_index) = uv2PSP(value);
+ 
+    function config_bias(bias_index, value, rate)
+        p.bias_strength(bias_index) = uV_2_PSP(value);
         p.bias_chance(bias_index, 1:p.time_steps) = uint32(floor((2^32 - 1) * (rate / p.fs)));
         p.biases = max(bias_index, p.biases);
     end
 
-    function Init_Unit(prefix, count, thresh, col_index, bias_index, LFP_index) % ('Ae', p.An, threshold, column, bias_id, LFP_id);
+    function config_column_layer_activity(prefix, count, thresh, col_index, bias_index, LFP_index) % ('Ae', p.An, threshold, column, bias_id, LFP_id);
        for iux = 1:count
             p.units = p.units + 1;
             p.unit_names{p.units} = [prefix num2str(iux)];  % Text name of unit
@@ -1585,18 +1535,8 @@ end
             p.unit_stim_target(p.units) = 0;
         end
     end
-
-    function flagsout = Set_Unit_Flags(flags, def)
-        % Converts a cell array of Name;ID_List pairs to a list of unit flags
-        for idef = 1:2:length(def)
-            name = def{idef};
-            index = def{idef+1};
-            flags(ismember(p.unit_group_index, index) & strncmp(p.unit_names, name, length(name))') = 1;          
-        end
-        flagsout = flags;
-    end
-
-    function Init_Weight(pre_name, pre_index, post_name, post_index, initial_PSP)
+ 
+    function config_column_layer_connections(pre_name, pre_index, post_name, post_index, initial_PSP)
         pre_units = find(strncmp(p.unit_names, pre_name, length(pre_name)));
         post_units = find(strncmp(p.unit_names, post_name, length(post_name)));
         npre = length(pre_index);
@@ -1664,19 +1604,81 @@ end
         end
     end
  
-    function PSP = calcPSP(weight, delay, bins, zerobin)
-        % Floating point version of target PSP shape
-        PSP = zeros(bins, 1);
-        s = uv2PSP(weight);
-        f = s;
-        for i=floor(zerobin + delay):bins
-            PSP(i) = s - f;
-            s = s * p.PSP_slow_decay;
-            f = f * p.PSP_fast_decay;
+    function finalize_configuration_()
+        % Finish network initialization
+        % Resize weight arrays to maximum defined weights
+        p.weight_pre_unit = p.weight_pre_unit(1:p.weights);
+        p.weight_post_unit = p.weight_post_unit(1:p.weights);
+        p.weight_strength = p.weight_strength(1:p.weights);
+        p.weight_training_rule = p.weight_training_rule(1:p.weights);
+        
+        % extra arrays needed for acceleration and information.
+        p.weight_pre_sort = zeros(p.weights, 1, 'uint32');   % Offsets to weights sorted by pre_unit
+        p.weight_post_sort = zeros(p.weights, 1, 'uint32');  % Offsets to weights sorted by post_unit
+         
+        % Sort weights by pre and post units and figure offsets into sort lists.
+        [sorted, indices] = sort(p.weight_pre_unit);
+        p.weight_pre_sort = uint32(indices - 1);
+        for iux = 1:p.units
+            index = find(sorted == iux, 1);
+            if ~isempty(index)
+                p.unit_pre_offset(iux) = index - 1;
+            end
+        end
+
+        [sorted, indices] = sort(p.weight_post_unit);
+        p.weight_post_sort = uint32(indices - 1);
+        for iux = 1:p.units
+            index = find(sorted == iux, 1);
+            if ~isempty(index)
+                p.unit_post_offset(iux) = index - 1;
+            end
+        end
+
+        p.weight_strength2 = p.weight_strength; % weight strength at next time step.
+        
+        % Initialize unit flags for paired pulse and tetanic.
+        p.unit_stim_source = get_flagged_units(p.unit_stim_source, p.stim_source_def);
+        p.unit_stim_target = get_flagged_units(p.unit_stim_target, p.stim_target_def);
+        
+        disp(['Final units: ' num2str(p.units) ', weights: ' num2str(p.weights)]);
+    end
+
+    function PSP_value = uV_2_PSP(uV_value)
+        % Convert PSP microvolt value to our exponential offset value.
+        % Randomize if uV_Value contains 2 values.
+        if length(uV_value) == 1
+            PSP_value = round(p.PSP_factor * uV_value);
+        else
+            PSP_value = round(p.PSP_factor * random('Uniform', uV_value(1), uV_value(2)));
         end
     end
 
-    function ysubramp = rampsub(y)
+    function new_flags = get_flagged_units(current_flags, def)
+        % Converts a cell array of Name;ID_List pairs to a list of unit flags
+        for idef = 1:2:length(def)
+            name = def{idef};
+            index = def{idef+1};
+            current_flags(...
+               ismember(p.unit_group_index, index) & ...
+               strncmp(p.unit_names, name, length(name))') = 1;          
+        end
+        new_flags = current_flags;
+    end
+ 
+    function PSP = compute_PSP(weight, delay, bins, zerobin)
+        % Floating point version of target PSP shape
+        PSP = zeros(bins, 1);
+        slow_component = uV_2_PSP(weight);
+        fast_component = slow_component;
+        for i=floor(zerobin + delay):bins
+            PSP(i) = slow_component - fast_component;
+            slow_component = slow_component * p.PSP_slow_decay;
+            fast_component = fast_component * p.PSP_fast_decay;
+        end
+    end
+
+    function ysubramp = linear_detrend(y)
         % subtracts from x a linear fit of x.
         xindex = 1:length(y);
         poly = polyfit(xindex, y, 1);
@@ -1693,95 +1695,6 @@ end
         xscale(1:2:n-1) = xdata;
         xscale(2:2:n-2) = xdata(2:end);
         xscale(end) = 2 * xdata(end) - xdata(end-1);
-    end
-
-    function display_weight_figure(usetitle)
-        % Creates a labeled weight matrix figure for our standard
-        % 40 exitatory/inhibory/output unit networks
-        wdfig = figure;
-        set(wdfig, 'Position', [100 100 590 500]);
-        
-        nColUnits = p.n_excit + p.n_inhib + p.n_out;  % number of units in a column
-        nDispUnits = p.n_excit + p.n_inhib;  % number of units in col to display
-        nDisplay = 3 * (p.n_excit + p.n_inhib);  % Ingnore column output units.
-        
-        a1Index = 1;
-        aOutIndex = a1Index + (p.n_excit + p.n_inhib);
-        b1Index = nColUnits + a1Index;
-        bOutIndex = b1Index + (p.n_excit + p.n_inhib);
-        c1Index = nColUnits + b1Index;
-        cOutIndex = c1Index + (p.n_excit + p.n_inhib);
-        
-        wvals = zeros(nDisplay, nDisplay);
-        for iw = 1:p.weights
-            pre_unit = p.weight_pre_unit(iw);
-            post_unit = p.weight_post_unit(iw);
-            
-            if pre_unit < b1Index
-                ix = pre_unit;
-                if pre_unit >= aOutIndex
-                    ix = 0;
-                end
-            elseif pre_unit < c1Index
-                ix = pre_unit - p.n_out;
-                if pre_unit >= bOutIndex
-                    ix = 0;
-                end
-            else
-                ix = pre_unit - 2 * p.n_out;
-                if pre_unit >= cOutIndex
-                    ix = 0;
-                end
-            end
-            
-            if post_unit < b1Index
-                iy = post_unit;
-                if post_unit >= aOutIndex
-                    iy = 0;
-                end
-            elseif post_unit < c1Index
-                iy = post_unit - p.n_out;
-                if post_unit >= bOutIndex
-                    iy = 0;
-                end
-            else
-                iy = post_unit - 2 * p.n_out;
-                if post_unit >= cOutIndex
-                    iy = 0;
-                end
-            end
-            
-            if (ix > 0) && (iy > 0)
-                wvals(ix, iy) = p.weight_strength(iw);
-            end
-        end
-        wvals(wvals == 0) = NaN;
-        wvals(1, end) = p.max_strength *  p.PSP_factor;
-        wvals(end, 1) = -p.max_strength *  p.PSP_factor;
-        h = pcolor(wvals/ p.PSP_factor);
-        
-        for itick = 41:40:241
-            line([1 241], [itick itick], 'Color', 'k');
-            line([itick itick], [1 241], 'Color', 'k');
-        end
-        
-        set(gca, 'XTick', 21:40:221);
-        set(gca, 'YTick', 21:40:221);
-        set(gca, 'YTickLabel', {'Ae', 'Ai', 'Be', 'Bi', 'Ce', 'Ci'});
-        set(gca, 'XTickLabel', {'Ae', 'Ai', 'Be', 'Bi', 'Ce', 'Ci'});
-        
-        ylabel('Pre-synaptic Units');
-        xlabel('Post-synaptic Units');
-        if nargin > 0
-            title(usetitle)
-        else
-            title('Weight Matrix');
-        end
-        colormap jet;
-        shading flat;
-        caxis([-500 500]);
-        colorbar;
-        drawnow
     end
 
 end
