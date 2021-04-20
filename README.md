@@ -288,7 +288,7 @@ p.conditioning_type = 1; 			% Note: this is the same as the default "no conditio
 						%	uses altered parameters.
 
 % % Also important % %
-p.bias_corrrelated_fraction = 0.0
+p.bias_correlated_fraction = 0.0
 p.initmin = 200;  					% Lower bound on initial PSP amplitude for any connections
 p.initmax = 300; 					% Upper bound on initial PSP amplitude for any connections
 p.epsp2excit_incol = [p.initmin p.initmax 1 0];     	% EPSP for connections to excitatory units within a column
